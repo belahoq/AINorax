@@ -1,0 +1,471 @@
+<!-- ============================================================
+     PASTE KODE INI KE DALAM POSTINGAN / WIDGET HTML BLOGGER
+     Ganti GAS_URL dengan URL Web App Google Apps Script Anda
+     ============================================================ -->
+
+<style>
+/* ==============================
+   RESET & BASE
+============================== */
+#app-raport *{box-sizing:border-box;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif}
+#app-raport{max-width:1280px;margin:0 auto;padding:16px}
+
+/* ==============================
+   HEADER
+============================== */
+.rp-header{
+  background:linear-gradient(135deg,#1565c0,#0d47a1);
+  color:#fff;padding:22px 16px 16px;
+  border-radius:10px;text-align:center;
+  margin-bottom:22px;
+  box-shadow:0 4px 12px rgba(21,101,192,.35)
+}
+.rp-header h2{margin:0 0 4px;font-size:1.6rem;letter-spacing:1px}
+.rp-header p{margin:0;font-size:.9rem;opacity:.85}
+
+/* ==============================
+   CARD
+============================== */
+.rp-card{
+  background:#fff;border-radius:10px;
+  box-shadow:0 2px 12px rgba(0,0,0,.1);
+  margin-bottom:22px;padding:22px
+}
+.rp-card h3{
+  color:#1565c0;font-size:1rem;font-weight:700;
+  margin:0 0 16px;display:flex;align-items:center;gap:8px
+}
+
+/* ==============================
+   FORM GRID
+============================== */
+.rp-form-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
+  gap:12px;
+  margin-bottom:14px
+}
+.rp-field{display:flex;flex-direction:column;gap:4px}
+.rp-field label{font-size:12px;color:#555;font-weight:600}
+.rp-field input,
+.rp-field select{
+  border:1px solid #ccc;border-radius:6px;
+  padding:8px 10px;font-size:14px;
+  outline:none;transition:border .2s;
+  background:#fafafa
+}
+.rp-field input:focus,
+.rp-field select:focus{border-color:#1565c0;background:#fff}
+
+/* ==============================
+   BUTTONS
+============================== */
+.rp-btn{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:9px 18px;border:none;border-radius:6px;
+  font-size:14px;font-weight:600;cursor:pointer;
+  transition:filter .2s,opacity .2s
+}
+.rp-btn:hover{filter:brightness(.9)}
+.rp-btn:disabled{opacity:.6;cursor:not-allowed}
+.rp-btn-primary{background:#1565c0;color:#fff;width:100%;justify-content:center;padding:10px}
+.rp-btn-pdf{background:#388e3c;color:#fff}
+.rp-btn-print{background:#6d4c41;color:#fff}
+.rp-btn-del{background:#c62828;color:#fff;padding:4px 10px;font-size:12px;border-radius:4px;border:none;cursor:pointer}
+.rp-btn-del:hover{background:#b71c1c}
+
+.rp-bar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px}
+.rp-bar-btns{display:flex;gap:8px;flex-wrap:wrap}
+
+/* ==============================
+   TABEL
+============================== */
+.rp-table-wrap{overflow-x:auto}
+table.rp-table{width:100%;border-collapse:collapse;font-size:13.5px}
+table.rp-table thead th{
+  background:#1565c0;color:#fff;
+  padding:10px 12px;white-space:nowrap;font-weight:600;
+  text-align:left
+}
+table.rp-table tbody td{
+  padding:8px 12px;border-bottom:1px solid #e0e0e0;vertical-align:middle
+}
+table.rp-table tbody tr:nth-child(even){background:#f8f9fa}
+table.rp-table tbody tr:hover{background:#e3f2fd;transition:background .15s}
+
+/* Badge nilai */
+.badge-n{display:inline-block;padding:2px 10px;border-radius:12px;font-weight:700;font-size:13px}
+.n-a{background:#c8e6c9;color:#1b5e20}
+.n-b{background:#dcedc8;color:#33691e}
+.n-c{background:#fff9c4;color:#f57f17}
+.n-d{background:#ffccbc;color:#bf360c}
+
+/* ==============================
+   LOADING & EMPTY STATE
+============================== */
+.rp-loading{display:none;text-align:center;padding:36px;color:#888}
+.rp-loading.on{display:block}
+.rp-spinner{
+  width:40px;height:40px;border:4px solid #e0e0e0;
+  border-top-color:#1565c0;border-radius:50%;
+  animation:spin .8s linear infinite;margin:0 auto 10px
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.rp-empty{text-align:center;padding:40px;color:#bbb;font-size:15px}
+
+/* ==============================
+   TOAST
+============================== */
+.rp-toast{
+  position:fixed;bottom:24px;right:24px;z-index:9999;
+  padding:12px 20px;border-radius:8px;color:#fff;font-size:14px;font-weight:600;
+  box-shadow:0 4px 16px rgba(0,0,0,.2);
+  animation:slideIn .3s ease;display:none;max-width:320px
+}
+.rp-toast.show{display:block}
+@keyframes slideIn{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}
+.rp-toast.green{background:#388e3c}
+.rp-toast.red{background:#c62828}
+.rp-toast.blue{background:#1565c0}
+
+/* ==============================
+   PRINT
+============================== */
+@media print{
+  @page{size:A4 landscape;margin:12mm}
+  body,#app-raport{background:#fff!important}
+  .rp-card{box-shadow:none!important}
+  .rp-header{background:#1565c0!important;-webkit-print-color-adjust:exact}
+  .rp-btn,.rp-bar-btns,.rp-field,.rp-form-card{display:none!important}
+  table.rp-table thead th{background:#1565c0!important;-webkit-print-color-adjust:exact}
+}
+</style>
+
+<!-- ============ MARKUP ============ -->
+<div id="app-raport">
+
+  <!-- Header -->
+  <div class="rp-header">
+    <h2>📚 Database Nilai Raport</h2>
+    <p>Sistem Entri &amp; Ledger Nilai Raport Siswa</p>
+  </div>
+
+  <!-- Form Input -->
+  <div class="rp-card rp-form-card">
+    <h3>✏️ Form Input Nilai Raport</h3>
+    <form id="rpForm" onsubmit="rpSimpan(event)">
+      <div class="rp-form-grid">
+
+        <div class="rp-field">
+          <label>NIS / NISN</label>
+          <input id="rp_nis" type="text" placeholder="Contoh: 1234" required>
+        </div>
+
+        <div class="rp-field" style="grid-column:span 2">
+          <label>Nama Siswa</label>
+          <input id="rp_nama" type="text" placeholder="Nama lengkap siswa" required>
+        </div>
+
+        <div class="rp-field">
+          <label>Kelas</label>
+          <input id="rp_kelas" type="text" placeholder="cth: X-A" required>
+        </div>
+
+        <div class="rp-field" style="grid-column:span 2">
+          <label>Mata Pelajaran</label>
+          <input id="rp_mapel" type="text" placeholder="cth: Matematika" required>
+        </div>
+
+        <div class="rp-field">
+          <label>Nilai (0–100)</label>
+          <input id="rp_nilai" type="number" step="0.01" min="0" max="100" placeholder="85" required>
+        </div>
+
+        <div class="rp-field">
+          <label>Semester</label>
+          <select id="rp_semester" required>
+            <option value="" disabled selected>-- Pilih --</option>
+            <option value="ganjil">Ganjil</option>
+            <option value="genap">Genap</option>
+          </select>
+        </div>
+
+        <div class="rp-field">
+          <label>Tahun Ajaran</label>
+          <input id="rp_tahun" type="text" placeholder="cth: 2025/2026" required>
+        </div>
+
+      </div>
+
+      <button type="submit" class="rp-btn rp-btn-primary" id="rpBtnSimpan">
+        💾 Simpan Nilai
+      </button>
+    </form>
+  </div>
+
+  <!-- Ledger Tabel -->
+  <div class="rp-card">
+    <div class="rp-bar">
+      <h3 style="margin:0">📋 Ledger Nilai Raport</h3>
+      <div class="rp-bar-btns">
+        <button class="rp-btn rp-btn-pdf" id="rpBtnPdf" onclick="rpDownloadPDF()">
+          📄 Download PDF
+        </button>
+        <button class="rp-btn rp-btn-print" onclick="window.print()">
+          🖨️ Cetak
+        </button>
+      </div>
+    </div>
+
+    <div class="rp-loading" id="rpLoading">
+      <div class="rp-spinner"></div>
+      <p>Memuat data...</p>
+    </div>
+
+    <div class="rp-table-wrap" id="rpTableWrap">
+      <table class="rp-table" id="rpTable">
+        <thead>
+          <tr>
+            <th>No</th>
+            <th>NIS</th>
+            <th>Nama Siswa</th>
+            <th>Kelas</th>
+            <th>Mata Pelajaran</th>
+            <th>Nilai</th>
+            <th>Semester</th>
+            <th>Tahun Ajaran</th>
+            <th>Tanggal Input</th>
+            <th style="text-align:center">Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="rpTbody"></tbody>
+      </table>
+      <div class="rp-empty" id="rpEmpty" style="display:none">
+        📭 Belum ada data nilai raport.
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Toast -->
+<div class="rp-toast" id="rpToast"></div>
+
+<!-- ============ SCRIPT ============ -->
+<script>
+(function () {
+
+  // ============================================================
+  // ⚙️  GANTI URL INI DENGAN URL WEB APP GOOGLE APPS SCRIPT ANDA
+  // ============================================================
+  var GAS_URL = 'https://script.google.com/macros/s/XXXX_GANTI_INI_XXXX/exec';
+
+  // ============================================================
+  // INISIALISASI
+  // ============================================================
+  (function init() {
+    // Default tahun ajaran
+    var now   = new Date();
+    var month = now.getMonth() + 1;
+    var year  = now.getFullYear();
+    document.getElementById('rp_tahun').value =
+      month >= 7 ? year + '/' + (year + 1) : (year - 1) + '/' + year;
+
+    rpMuatData();
+  })();
+
+  // ============================================================
+  // MUAT DATA — GET
+  // ============================================================
+  window.rpMuatData = function () {
+    showLoading(true);
+
+    fetch(GAS_URL + '?action=get')
+      .then(function (r) { return r.json(); })
+      .then(function (res) {
+        showLoading(false);
+        if (res.success) {
+          rpTampilData(res.data);
+        } else {
+          toast('Gagal memuat: ' + res.message, 'red');
+        }
+      })
+      .catch(function (err) {
+        showLoading(false);
+        toast('Error: ' + err.message, 'red');
+      });
+  };
+
+  // ============================================================
+  // TAMPILKAN DATA DI TABEL
+  // ============================================================
+  function rpTampilData(data) {
+    var tbody = document.getElementById('rpTbody');
+    var empty = document.getElementById('rpEmpty');
+    tbody.innerHTML = '';
+
+    if (!data || data.length === 0) {
+      empty.style.display = 'block';
+      return;
+    }
+    empty.style.display = 'none';
+
+    data.forEach(function (row, i) {
+      var tr = document.createElement('tr');
+      tr.innerHTML =
+        '<td>' + (i + 1) + '</td>' +
+        '<td>' + (row.nis || '-') + '</td>' +
+        '<td><strong>' + (row.nama || '-') + '</strong></td>' +
+        '<td>' + (row.kelas || '-') + '</td>' +
+        '<td>' + (row.mapel || '-') + '</td>' +
+        '<td>' + badgeNilai(row.nilai) + '</td>' +
+        '<td>' + (row.semester === 'ganjil' ? '🌙 Ganjil' : '☀️ Genap') + '</td>' +
+        '<td>' + (row.tahun_ajaran || '-') + '</td>' +
+        '<td style="font-size:11px;color:#999">' + (row.tanggal || '-') + '</td>' +
+        '<td style="text-align:center">' +
+          '<button class="rp-btn-del" onclick="rpHapus(\'' + row.id + '\')">🗑️ Hapus</button>' +
+        '</td>';
+      tbody.appendChild(tr);
+    });
+  }
+
+  // ============================================================
+  // SIMPAN NILAI — POST
+  // ============================================================
+  window.rpSimpan = function (e) {
+    e.preventDefault();
+
+    var semester = document.getElementById('rp_semester').value;
+    if (!semester) { toast('Pilih semester terlebih dahulu!', 'red'); return; }
+
+    var payload = {
+      action:       'simpan',
+      nis:          document.getElementById('rp_nis').value.trim(),
+      nama:         document.getElementById('rp_nama').value.trim(),
+      kelas:        document.getElementById('rp_kelas').value.trim(),
+      mapel:        document.getElementById('rp_mapel').value.trim(),
+      nilai:        parseFloat(document.getElementById('rp_nilai').value),
+      semester:     semester,
+      tahun_ajaran: document.getElementById('rp_tahun').value.trim()
+    };
+
+    var btn = document.getElementById('rpBtnSimpan');
+    btn.disabled = true;
+    btn.textContent = '⏳ Menyimpan...';
+
+    fetch(GAS_URL, {
+      method:  'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body:    JSON.stringify(payload)
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (res) {
+        btn.disabled = false;
+        btn.textContent = '💾 Simpan Nilai';
+        if (res.success) {
+          toast('✅ Nilai berhasil disimpan!', 'green');
+          document.getElementById('rpForm').reset();
+          // Reset tahun ajaran default
+          var now   = new Date();
+          var month = now.getMonth() + 1;
+          var year  = now.getFullYear();
+          document.getElementById('rp_tahun').value =
+            month >= 7 ? year + '/' + (year + 1) : (year - 1) + '/' + year;
+          rpMuatData();
+        } else {
+          toast('Gagal: ' + res.message, 'red');
+        }
+      })
+      .catch(function (err) {
+        btn.disabled = false;
+        btn.textContent = '💾 Simpan Nilai';
+        toast('Error: ' + err.message, 'red');
+      });
+  };
+
+  // ============================================================
+  // HAPUS DATA — POST
+  // ============================================================
+  window.rpHapus = function (id) {
+    if (!confirm('Yakin ingin menghapus data ini?')) return;
+
+    fetch(GAS_URL, {
+      method:  'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body:    JSON.stringify({ action: 'hapus', id: id })
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (res) {
+        if (res.success) {
+          toast('🗑️ Data berhasil dihapus!', 'green');
+          rpMuatData();
+        } else {
+          toast('Gagal: ' + res.message, 'red');
+        }
+      })
+      .catch(function (err) { toast('Error: ' + err.message, 'red'); });
+  };
+
+  // ============================================================
+  // DOWNLOAD PDF — POST
+  // ============================================================
+  window.rpDownloadPDF = function () {
+    var btn = document.getElementById('rpBtnPdf');
+    btn.disabled = true;
+    btn.textContent = '⏳ Membuat PDF...';
+    toast('⏳ Sedang membuat PDF, harap tunggu...', 'blue');
+
+    fetch(GAS_URL, {
+      method:  'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body:    JSON.stringify({ action: 'pdf' })
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (res) {
+        btn.disabled = false;
+        btn.textContent = '📄 Download PDF';
+        if (res.success && res.url) {
+          window.open(res.url, '_blank');
+          toast('✅ PDF berhasil dibuat!', 'green');
+        } else {
+          toast('Gagal membuat PDF: ' + (res.message || 'Unknown error'), 'red');
+        }
+      })
+      .catch(function (err) {
+        btn.disabled = false;
+        btn.textContent = '📄 Download PDF';
+        toast('Error: ' + err.message, 'red');
+      });
+  };
+
+  // ============================================================
+  // HELPERS
+  // ============================================================
+  function badgeNilai(n) {
+    var v   = parseFloat(n);
+    var cls = 'n-d';
+    if (v >= 90)      cls = 'n-a';
+    else if (v >= 75) cls = 'n-b';
+    else if (v >= 60) cls = 'n-c';
+    return '<span class="badge-n ' + cls + '">' + v.toFixed(2) + '</span>';
+  }
+
+  function showLoading(on) {
+    var el = document.getElementById('rpLoading');
+    if (on) el.classList.add('on');
+    else    el.classList.remove('on');
+  }
+
+  var toastTimer;
+  function toast(msg, type) {
+    var el = document.getElementById('rpToast');
+    el.textContent = msg;
+    el.className   = 'rp-toast show ' + (type || 'blue');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () {
+      el.classList.remove('show');
+    }, 3500);
+  }
+
+})();
+</script>
