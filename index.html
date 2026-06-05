@@ -258,7 +258,7 @@ table.rp-table tbody tr:hover{background:#e3f2fd;transition:background .15s}
   // ============================================================
   // ⚙️  GANTI URL INI DENGAN URL WEB APP GOOGLE APPS SCRIPT ANDA
   // ============================================================
-  var GAS_URL = 'https://script.google.com/macros/s/XXXX_GANTI_INI_XXXX/exec';
+  var GAS_URL = 'https://script.google.com/macros/s/AKfycbzEUU5mEOaDJ5a38oGpMT1GMqrxj9v4htVot_O5EF9q2d0MHSF3zb5PXx5erOa-cJzK/exec';
 
   // ============================================================
   // INISIALISASI
@@ -280,7 +280,9 @@ table.rp-table tbody tr:hover{background:#e3f2fd;transition:background .15s}
   window.rpMuatData = function () {
     showLoading(true);
 
-    fetch(GAS_URL + '?action=get')
+    fetch(GAS_URL + '?action=get', {
+      redirect: 'follow'
+    })
       .then(function (r) { return r.json(); })
       .then(function (res) {
         showLoading(false);
@@ -354,9 +356,10 @@ table.rp-table tbody tr:hover{background:#e3f2fd;transition:background .15s}
     btn.textContent = '⏳ Menyimpan...';
 
     fetch(GAS_URL, {
-      method:  'POST',
-      headers: { 'Content-Type': 'text/plain' },
-      body:    JSON.stringify(payload)
+      method:   'POST',
+      redirect: 'follow',
+      headers:  { 'Content-Type': 'text/plain' },
+      body:     JSON.stringify(payload)
     })
       .then(function (r) { return r.json(); })
       .then(function (res) {
@@ -390,9 +393,10 @@ table.rp-table tbody tr:hover{background:#e3f2fd;transition:background .15s}
     if (!confirm('Yakin ingin menghapus data ini?')) return;
 
     fetch(GAS_URL, {
-      method:  'POST',
-      headers: { 'Content-Type': 'text/plain' },
-      body:    JSON.stringify({ action: 'hapus', id: id })
+      method:   'POST',
+      redirect: 'follow',
+      headers:  { 'Content-Type': 'text/plain' },
+      body:     JSON.stringify({ action: 'hapus', id: id })
     })
       .then(function (r) { return r.json(); })
       .then(function (res) {
@@ -416,9 +420,10 @@ table.rp-table tbody tr:hover{background:#e3f2fd;transition:background .15s}
     toast('⏳ Sedang membuat PDF, harap tunggu...', 'blue');
 
     fetch(GAS_URL, {
-      method:  'POST',
-      headers: { 'Content-Type': 'text/plain' },
-      body:    JSON.stringify({ action: 'pdf' })
+      method:   'POST',
+      redirect: 'follow',
+      headers:  { 'Content-Type': 'text/plain' },
+      body:     JSON.stringify({ action: 'pdf' })
     })
       .then(function (r) { return r.json(); })
       .then(function (res) {

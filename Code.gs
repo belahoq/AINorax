@@ -1,7 +1,7 @@
 // =============================================
 // KONFIGURASI - SESUAIKAN DENGAN SPREADSHEET ANDA
 // =============================================
-const SPREADSHEET_ID = 'MASUKKAN_ID_SPREADSHEET_ANDA'; // Ganti dengan ID Google Spreadsheet Anda
+const SPREADSHEET_ID = '1d4KfxgpDY7UoOBQXen6WkAHkc3jGr3EfqNsRdNHw3Nc';
 const SHEET_NAME     = 'LedgerNilai';
 
 // =============================================
