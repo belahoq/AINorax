@@ -265,6 +265,43 @@
 
 ---
 
+### [REVIEW] Pre-Deploy Review — Audit Menyeluruh Sebelum Deploy
+- **Tanggal:** 2026-06-07
+- **Status:** ✅ Selesai
+- **Deskripsi:** Review sistematis seluruh codebase sebelum deploy ke production. Ditemukan 4 masalah yang diperbaiki (1 kritis, 3 minor), 1 fitur ditingkatkan (MasterData sinkron ke GAS), dan dokumen PRE_DEPLOY_CHECKLIST.md dibuat.
+
+---
+
+#### Temuan & Perbaikan
+
+| # | Tingkat | File | Masalah | Status |
+|---|---------|------|---------|--------|
+| 1 | 🔴 Kritis | `Login.jsx` | `useState` dan `useEffect` diimport dua kali di dua baris terpisah | ✅ Digabung jadi satu import |
+| 2 | 🟡 Minor | `api.js` | `saveSettings()` punya `const data = await gasRequest(...)` yang tidak dipakai | ✅ Dihapus unused variable |
+| 3 | 🟡 Minor | `constants.js` | `SEKOLAH.alamat` tidak konsisten dengan `DEFAULT_MASTER_DATA.alamat` — SEKOLAH punya alamat lengkap, DEFAULT hanya jalan | ✅ Disamakan + tambah komentar klarifikasi tujuan masing-masing |
+| 4 | 🔵 Peningkatan | `MasterData.jsx` | Tombol Simpan hanya menyimpan ke localStorage, tidak sync ke GAS saat backend aktif | ✅ Ditambah: jika `VITE_API_URL` aktif, simpan ke localStorage LALU sync ke GAS. Jika GAS gagal → toast warning tapi tidak block |
+
+#### Yang Sudah Aman (Dikonfirmasi)
+- `ALLOWED_ACTIONS` Worker ↔ GAS ↔ `api.js` sudah sinkron (10 action)
+- Token HMAC-SHA256 dengan TTL 8 jam + `timingSafeEqual` tahan timing attack
+- CORS headers lengkap, `ALLOWED_ORIGIN` bisa multi-origin (pisah koma)
+- `GAS_SECRET` tidak pernah muncul di response ke frontend (ada sanitasi eksplisit)
+- Fallback dummy data transparan di semua fungsi API
+- Tailwind colors `cyan`, `ungu`, `purple` sudah terdefinisi
+- Semua import/export sinkron (tidak ada build error)
+- Error handling konsisten Bahasa Indonesia di semua layer
+
+#### File yang Diubah
+- `frontend/src/pages/Login.jsx` — fix double import
+- `frontend/src/lib/api.js` — hapus unused variable di `saveSettings()`
+- `frontend/src/lib/constants.js` — sinkronkan format `SEKOLAH.alamat`, tambah komentar
+- `frontend/src/pages/MasterData.jsx` — `handleSimpan` sekarang `async`, simpan ke GAS jika backend aktif
+
+#### File yang Dibuat
+- `PRE_DEPLOY_CHECKLIST.md` — 7 bagian, 40+ item checklist: GAS, Worker, Frontend, API Contract, Keamanan, Performa, Checklist Akhir
+
+---
+
 ### [BUGFIX] Build error — "getTemplate" is not exported by api.js
 - **Tanggal:** 2026-06-07
 - **Status:** ✅ Diperbaiki

@@ -3,10 +3,15 @@
 // ============================================================
 
 // === Identitas Sekolah ===
+// CATATAN: Field ini hanya digunakan di UI (Dashboard banner, Login, dll.)
+// Data aktual untuk dokumen diambil dari DEFAULT_MASTER_DATA / GAS Settings.
 export const SEKOLAH = {
   nama:        'SD Negeri 3 Pringgabaya',
   npsn:        '50205367',
-  alamat:      'Jl. Raya Pringgabaya, Kec. Pringgabaya, Kab. Lombok Timur, NTB',
+  alamat:      'Jl. Raya Pringgabaya',        // jalan saja — detail di DEFAULT_MASTER_DATA
+  kecamatan:   'Pringgabaya',
+  kabupaten:   'Lombok Timur',
+  provinsi:    'Nusa Tenggara Barat',
   telepon:     '(0376) 21XXX',
   website:     'www.sdn3pringgabaya.sch.id',
   email:       'sdn3pringgabaya@gmail.com',
