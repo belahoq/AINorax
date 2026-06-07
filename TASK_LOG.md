@@ -174,4 +174,21 @@
   - `wrangler.toml` (aktif) ada di `.gitignore` — hanya `.example` yang di-commit
   - Login delay 300ms saat PIN salah untuk memperlambat brute-force
 
+### [TAHAP-08] Buat Google Apps Script Backend (Code.gs)
+- **Tanggal:** 2026-06-07
+- **Status:** ✅ Selesai
+- **Deskripsi:** Membangun backend Google Apps Script lengkap. Mencakup entry point doPost, 10 action handler, 8 helper function, auto-inisialisasi sheet, dan dokumentasi setup lengkap.
+- **File dibuat/diubah:**
+  - `gas/Code.gs` *(baru)* — backend GAS lengkap: `doPost`, `jsonResponse`, `validateSecret`, `routeAction`, `ping`, `getSettings`, `saveSettings`, `getDashboardStats`, `createDocument` (+ `buatDokumenBaru` fallback + `getTemplateDocId`), `listDocuments`, `getDocument`, `listTemplates`, `saveTemplate`, `createLog`, `getSheet` (auto-create + header), `generateId`, `replacePlaceholdersInDoc`, `createPdfFromDoc`, `logAction`, `formatTanggalIndonesia`, `initSpreadsheet`
+  - `gas/README_GAS.md` *(baru)* — dokumentasi 7 langkah setup, struktur 4 sheet, semua action + format request/response, cara buat template placeholder, cara redeploy, troubleshooting
+  - `README.md` *(baru di root)* — README utama repo: arsitektur, struktur folder, quick start, tabel fitur MVP, 8 jenis dokumen, keamanan
+- **Catatan:**
+  - `createDocument` punya dua mode: salin template Google Docs yang ada (via `getTemplateDocId`) atau buat dokumen baru dari scratch (`buatDokumenBaru`) jika template tidak ditemukan — tidak pernah gagal karena tidak ada template
+  - `getSheet` otomatis membuat sheet baru dengan header jika belum ada — tidak perlu setup manual
+  - `initSpreadsheet` dijalankan sekali dari Apps Script Editor untuk inisialisasi 4 sheet + data Settings default
+  - `replacePlaceholdersInDoc` mengganti `{{key}}` di Body, Header, dan Footer dokumen
+  - `createPdfFromDoc` menggunakan export URL + OAuth token — tidak butuh library tambahan
+  - `logAction` silent fail — tidak melempar error agar tidak mengganggu flow utama
+  - Script Properties: `GAS_SECRET`, `SPREADSHEET_ID`, `DRIVE_FOLDER_ID`, `DEFAULT_TEMPLATE_DOC_ID` (opsional)
+
 <!-- Entri berikutnya akan ditambahkan di bawah ini -->
