@@ -471,6 +471,36 @@ function createDocument(payload) {
       templateData['tahunAjaran']  = '2025/2026';
     }
 
+    // Konversi semua field tanggal dari format ISO (yyyy-MM-dd) ke
+    // format Indonesia (dd Bulan yyyy) agar tampil rapi di dokumen.
+    // Field yang dikonversi: semua key yang mengandung kata 'tanggal'
+    // dengan nilai bertanda '-' (yyyy-MM-dd atau yyyy-MM-ddThh:mm:ss).
+    Object.keys(templateData).forEach(function(key) {
+      var val = String(templateData[key] || '');
+      // Cocokkan format yyyy-MM-dd atau yyyy-MM-ddThh:mm:ssZ
+      if (/^\d{4}-\d{2}-\d{2}/.test(val)) {
+        try {
+          templateData[key] = formatTanggalIndonesia(new Date(val));
+        } catch (e) {
+          // Biarkan nilai asli jika parse gagal
+        }
+      }
+    });
+
+    // Pastikan placeholder tanggal di atas tanda tangan selalu tersedia.
+    // {{tanggalSurat}} = tanggal dokumen dibuat (hari ini), format Indonesia.
+    // Digunakan di template sebagai: "Pringgabaya, {{tanggalSurat}}"
+    if (!templateData['tanggalSurat']) {
+      templateData['tanggalSurat'] = formatTanggalIndonesia(new Date());
+    }
+
+    // Bangun baris tempat + tanggal untuk tanda tangan
+    // Contoh: "Pringgabaya, 07 Juni 2026"
+    templateData['tempatTanggalSurat'] =
+      (templateData['kecamatan'] || 'Pringgabaya') +
+      ', ' +
+      templateData['tanggalHariIni'];
+
     // ── 3. Cari template Google Docs yang sesuai ──────────────
     var templateDocId = getTemplateDocId(jenis);
 
@@ -609,9 +639,13 @@ function buatDokumenBaru(judul, docId, data, folderId) {
 
     body.appendParagraph('');
 
-    // Tanda tangan
+    // Tanda tangan — gunakan tempatTanggalSurat jika sudah tersedia
+    var barisTtd = data['tempatTanggalSurat']
+      ? data['tempatTanggalSurat']
+      : (data['kecamatan'] || 'Pringgabaya') + ', ' + formatTanggalIndonesia(new Date());
+
     var ttdPara = body.appendParagraph(
-      (data['kecamatan'] || 'Pringgabaya') + ', ' + formatTanggalIndonesia(new Date()) + '\n' +
+      barisTtd + '\n' +
       'Kepala Sekolah,\n\n\n\n' +
       (data['namaKepsek'] || 'Nama Kepala Sekolah') + '\n' +
       'NIP. ' + (data['nipKepsek'] || '—')
