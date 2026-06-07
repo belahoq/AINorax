@@ -96,4 +96,19 @@
   - Toast baru menggunakan desain border-kiri berwarna (lebih ringan dari background penuh)
   - Layout auto-close sidebar saat pindah halaman (UX mobile lebih baik)
 
+### [TAHAP-03] Bangun Halaman Dashboard Informatif
+- **Tanggal:** 2026-06-07
+- **Status:** ✅ Selesai
+- **Deskripsi:** Membangun ulang halaman Dashboard dengan 5 seksi lengkap: banner sambutan dinamis, 6 kartu statistik, 4 aksi cepat gradient, tabel dokumen terbaru, dan status sistem. Semua data dari konstanta dummy.
+- **File dibuat/diubah:**
+  - `frontend/src/lib/constants.js` — tambah `DUMMY_STATS` (6 metrik + trend), `DUMMY_DOKUMEN_TERBARU` (6 baris), `DUMMY_STATUS_SISTEM` (frontend/worker/gas)
+  - `frontend/src/components/StatCard.jsx` — strip warna atas, 6 tema warna (hijau/navy/emas/merah/ungu/cyan), prop `trend` (↑↓–), prop `compact`, prop `onClick`
+  - `frontend/src/components/DataTable.jsx` — prop `title`, `headerRight`, `emptyTitle/Subtitle/Action/Icon`, `footer`, `compact`, `striped`; menggunakan `EmptyState` & `LoadingState` internal
+  - `frontend/src/pages/Dashboard.jsx` — rebuild lengkap: banner sambutan (sapaan waktu pagi/siang/sore/malam), 6 StatCard grid responsif (2→3→6 kolom), 4 aksi cepat kartu gradient, DataTable dokumen terbaru + footer, seksi status sistem 3 kartu + `StatusBadge`, ikon SVG inline per sistem
+- **Catatan:**
+  - StatCard grid: `grid-cols-2 sm:grid-cols-3 lg:grid-cols-6` — rapi di semua breakpoint
+  - Aksi cepat menggunakan gradient gelap per warna brand
+  - Status sistem: Frontend=online (hijau), Worker & GAS=unknown (abu) — akan aktif setelah backend dikonfigurasi
+  - Semua data dari `DUMMY_*` di `constants.js` — zero API call
+
 <!-- Entri berikutnya akan ditambahkan di bawah ini -->
