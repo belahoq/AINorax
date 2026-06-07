@@ -467,6 +467,61 @@ export async function saveTemplate(payload) {
 export const addTemplate = saveTemplate
 
 // ============================================================
+// editTemplate — update template yang sudah ada
+// ============================================================
+
+/**
+ * Update data template yang sudah ada berdasarkan ID.
+ * Menggunakan saveTemplate() dengan payload yang menyertakan id.
+ * @param {string} id      - ID template yang akan diupdate
+ * @param {Object} payload - data baru { namaTemplate, jenisDokumen, docsTemplateId, variabel }
+ * @returns {Promise<{ message: string }>}
+ * @throws {Error}
+ */
+export async function editTemplate(id, payload) {
+  if (!id) throw new Error('ID template wajib diisi untuk update.')
+
+  if (!BACKEND_CONFIGURED) {
+    await _delay(700)
+    return { message: 'Template berhasil diperbarui (mode demo).' }
+  }
+
+  // Kirim dengan id → GAS saveTemplate akan update, bukan insert baru
+  return saveTemplate({ ...payload, id })
+}
+
+// ============================================================
+// cloneTemplate — duplikat template dengan nama baru
+// ============================================================
+
+/**
+ * Duplikat template yang ada menjadi template baru.
+ * ID tidak disertakan → GAS akan membuat entri baru (insert).
+ * Nama otomatis diberi prefix "Salinan dari ".
+ * @param {Object} tmpl - objek template yang akan diduplikat
+ * @returns {Promise<{ message: string }>}
+ * @throws {Error}
+ */
+export async function cloneTemplate(tmpl) {
+  if (!tmpl) throw new Error('Data template sumber wajib diisi.')
+
+  if (!BACKEND_CONFIGURED) {
+    await _delay(800)
+    return { message: 'Template berhasil diduplikat (mode demo).' }
+  }
+
+  // Kirim TANPA id → GAS akan insert sebagai template baru
+  return saveTemplate({
+    namaTemplate:   'Salinan dari ' + tmpl.namaTemplate,
+    jenisDokumen:   tmpl.jenisDokumen,
+    docsTemplateId: tmpl.docsTemplateId,
+    variabel:       Array.isArray(tmpl.variabel) ? tmpl.variabel.join(', ') : (tmpl.variabel || ''),
+    isActive:       true,
+    // id sengaja tidak disertakan
+  })
+}
+
+// ============================================================
 // deleteTemplate — hapus template
 // ============================================================
 

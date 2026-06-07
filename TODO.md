@@ -207,6 +207,8 @@
 - [ ] Import data siswa dari Excel
 - [ ] Laporan bulanan/tahunan
 - [ ] Dark mode
+- [x] **Edit template** — SELESAI (TAHAP-11)
+- [x] **Clone/Duplikat template** — SELESAI (TAHAP-11)
 
 ---
 
