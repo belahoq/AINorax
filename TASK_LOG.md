@@ -262,3 +262,19 @@
 | Dark mode | Tidak dalam scope MVP |
 
 <!-- Entri berikutnya akan ditambahkan di bawah ini -->
+
+---
+
+### [BUGFIX] initSpreadsheet — Cannot call SpreadsheetApp.getUi() from this context
+- **Tanggal:** 2026-06-07
+- **Status:** ✅ Diperbaiki
+- **File:** `gas/Code.gs`
+- **Penyebab:**
+  `SpreadsheetApp.getUi()` hanya dapat dipanggil dari konteks UI yang aktif — yaitu saat kode berjalan dari dalam Spreadsheet yang terbuka di browser (misalnya via menu Add-on atau `onOpen` trigger). Ketika fungsi `initSpreadsheet` dijalankan langsung dari **Apps Script Editor** (Run → initSpreadsheet), konteksnya adalah *script editor*, bukan spreadsheet, sehingga `getUi()` melempar exception `Cannot call SpreadsheetApp.getUi() from this context`.
+- **Solusi:**
+  Bungkus kedua pemanggilan `SpreadsheetApp.getUi().alert(...)` di dalam blok `try/catch` tersendiri. Jika `getUi()` gagal (dijalankan dari Editor), exception diabaikan secara senyap (silent catch) dan pesan sukses/error tetap tercatat di `Logger.log()`. Hasil bisa dilihat di **View → Execution log** di Apps Script Editor.
+- **Cara verifikasi setelah fix:**
+  1. Buka project GAS di script.google.com
+  2. Pilih fungsi `initSpreadsheet` dari dropdown → klik ▶ Run
+  3. Tidak ada exception → cek **View → Execution log** → harus ada baris `[initSpreadsheet] Selesai. Semua sheet sudah siap digunakan.`
+  4. Cek Google Spreadsheet → harus muncul 4 sheet: Settings, Documents, Templates, Logs
