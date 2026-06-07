@@ -1,0 +1,9 @@
+# Konfigurasi Wrangler aktif — berisi Account ID, jangan di-commit
+wrangler.toml
+
+# Dependensi (jika ada package.json di masa depan)
+node_modules/
+
+# Output build Wrangler
+.wrangler/
+dist/

@@ -1,0 +1,73 @@
+# ============================================================
+# wrangler.toml.example — Konfigurasi Cloudflare Worker
+# SDENTIBAYA AdminKit
+#
+# CARA PAKAI:
+# 1. Salin file ini: cp wrangler.toml.example wrangler.toml
+# 2. Ganti semua nilai placeholder (dalam tanda <...>)
+# 3. Set secret via CLI: wrangler secret put GAS_SECRET
+# 4. JANGAN commit wrangler.toml ke git (sudah ada di .gitignore)
+# ============================================================
+
+# ── Identitas Worker ────────────────────────────────────────
+name            = "sdentibaya-adminkit-worker"
+main            = "index.js"
+compatibility_date = "2024-01-01"
+
+# ── Akun Cloudflare ─────────────────────────────────────────
+# Temukan di: https://dash.cloudflare.com → kanan atas → Account ID
+account_id = "<CLOUDFLARE_ACCOUNT_ID>"
+
+# ── Environment Variables (nilai tidak sensitif) ────────────
+# Nilai sensitif (GAS_SECRET, ADMIN_PIN) JANGAN diisi di sini.
+# Gunakan: wrangler secret put <NAMA_VAR>
+[vars]
+  # Origin frontend yang diizinkan akses Worker ini.
+  # Development  : http://localhost:5173
+  # Production   : https://<nama-project>.pages.dev
+  # Multi-origin : pisahkan dengan koma (tanpa spasi)
+  #   contoh: "https://adminkit.pages.dev,https://www.sdn3pringgabaya.sch.id"
+  ALLOWED_ORIGIN = "http://localhost:5173"
+
+  # URL Google Apps Script (nilai tidak sensitif — hanya URL publik deployment)
+  # Isi setelah GAS di-deploy sebagai Web App.
+  # Format: https://script.google.com/macros/s/<DEPLOYMENT_ID>/exec
+  GAS_URL = ""
+
+# ── Environment: Development ────────────────────────────────
+[env.development]
+  name = "sdentibaya-adminkit-worker-dev"
+  [env.development.vars]
+    ALLOWED_ORIGIN = "http://localhost:5173"
+    GAS_URL        = ""   # isi URL GAS development/testing
+
+# ── Environment: Production ─────────────────────────────────
+[env.production]
+  name = "sdentibaya-adminkit-worker"
+  [env.production.vars]
+    ALLOWED_ORIGIN = "https://<nama-project>.pages.dev"
+    GAS_URL        = ""   # isi URL GAS production setelah deploy
+
+# ============================================================
+# CARA SET SECRET (nilai sensitif)
+# Jalankan perintah ini di terminal — JANGAN tulis nilainya di sini
+#
+# Development:
+#   wrangler secret put GAS_SECRET --env development
+#   wrangler secret put ADMIN_PIN  --env development
+#
+# Production:
+#   wrangler secret put GAS_SECRET --env production
+#   wrangler secret put ADMIN_PIN  --env production
+#
+# Atau via Cloudflare Dashboard:
+#   Workers & Pages → sdentibaya-adminkit-worker
+#   → Settings → Variables and Secrets → Add variable
+# ============================================================
+
+# ── Catatan Keamanan ────────────────────────────────────────
+# ✅ GAS_SECRET  — set via wrangler secret (terenkripsi)
+# ✅ ADMIN_PIN   — set via wrangler secret (terenkripsi)
+# ✅ GAS_URL     — boleh di vars (URL publik, bukan rahasia)
+# ✅ ALLOWED_ORIGIN — boleh di vars (nilai konfigurasi)
+# ❌ JANGAN taruh nilai apapun yang sensitif di file ini
