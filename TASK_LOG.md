@@ -265,6 +265,16 @@
 
 ---
 
+### [BUGFIX] Form Surat Undangan Rapat tidak ada field Tanggal Surat
+- **Tanggal:** 2026-06-07
+- **Status:** ✅ Diperbaiki
+- **File:** `frontend/src/lib/constants.js`
+- **Masalah:** Seksi "Identitas Surat" pada `DOC_FIELDS.undangan_rapat` tidak memiliki field `tanggalSurat`. Akibatnya operator tidak bisa mengisi tanggal penerbitan surat yang seharusnya muncul di kepala surat dan di atas tanda tangan pimpinan. Field `tanggal` yang ada di seksi "Waktu & Tempat" adalah tanggal **pelaksanaan rapat** — berbeda tujuan.
+- **Solusi:** Tambahkan satu field `tanggalSurat` bertipe `date` di posisi kedua seksi "Identitas Surat" (setelah Nomor Surat, sebelum Lampiran), dengan hint "Tanggal penerbitan surat — tampil di atas tanda tangan pimpinan". Field ini `required: true`.
+- **Catatan:** Field `tanggalSurat` sudah diproses otomatis oleh GAS — nilai ISO `yyyy-MM-dd` dikonversi ke format Indonesia, dan placeholder `{{tanggalSurat}}` + `{{tempatTanggalSurat}}` tersedia di template Google Docs.
+
+---
+
 ### [BUGFIX] Format tanggal ISO di dokumen + tanggal tanda tangan tidak muncul
 - **Tanggal:** 2026-06-07
 - **Status:** ✅ Diperbaiki
