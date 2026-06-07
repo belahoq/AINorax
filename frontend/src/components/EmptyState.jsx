@@ -4,37 +4,74 @@
 
 /**
  * Props:
- * - title    : string (default: 'Belum ada data')
- * - subtitle : string (opsional)
- * - action   : ReactNode (opsional) — tombol aksi
+ * - title    : string  (default: 'Belum ada data')
+ * - subtitle : string  (opsional)
+ * - action   : ReactNode (opsional) — tombol / link aksi
  * - icon     : ReactNode (opsional) — override ikon default
+ * - compact  : boolean  — tampilan lebih kecil (default: false)
  */
 export default function EmptyState({
-  title = 'Belum ada data',
+  title    = 'Belum ada data',
   subtitle,
   action,
   icon,
+  compact = false,
 }) {
   return (
-    <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
-      {/* Ikon */}
-      <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4 text-gray-400">
+    <div
+      className={[
+        'flex flex-col items-center justify-center text-center px-6',
+        compact ? 'py-10' : 'py-16',
+      ].join(' ')}
+    >
+      {/* Ikon dalam lingkaran */}
+      <div
+        className={[
+          'rounded-2xl bg-gray-100 flex items-center justify-center text-gray-400 mb-4',
+          compact ? 'w-12 h-12' : 'w-16 h-16',
+        ].join(' ')}
+      >
         {icon || (
-          <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round"
-              d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+          <svg
+            className={compact ? 'w-6 h-6' : 'w-8 h-8'}
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={1.5}
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
+            />
           </svg>
         )}
       </div>
 
-      {/* Teks */}
-      <h3 className="text-sm font-semibold text-gray-700 mb-1">{title}</h3>
+      {/* Judul */}
+      <h3 className={[
+        'font-semibold text-gray-700',
+        compact ? 'text-sm' : 'text-[15px]',
+      ].join(' ')}>
+        {title}
+      </h3>
+
+      {/* Subtitle */}
       {subtitle && (
-        <p className="text-sm text-gray-400 max-w-xs mb-4">{subtitle}</p>
+        <p className={[
+          'text-gray-400 mt-1 max-w-xs leading-relaxed',
+          compact ? 'text-xs' : 'text-sm',
+        ].join(' ')}>
+          {subtitle}
+        </p>
       )}
 
       {/* Aksi */}
-      {action && <div className="mt-2">{action}</div>}
+      {action && (
+        <div className="mt-4">
+          {action}
+        </div>
+      )}
     </div>
   )
 }

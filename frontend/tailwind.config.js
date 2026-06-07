@@ -6,8 +6,10 @@ export default {
   ],
   theme: {
     extend: {
-      // === Warna Brand SDENTIBAYA ===
-      // Hijau cerah: utama | Navy lembut: sidebar | Kuning emas: aksen | Putih: bg
+      // ============================================================
+      // Warna Brand SDENTIBAYA
+      // Hijau: utama | Navy: sidebar | Emas: aksen | Putih: bg
+      // ============================================================
       colors: {
         hijau: {
           50:  '#f0fdf4',
@@ -16,7 +18,7 @@ export default {
           300: '#86efac',
           400: '#4ade80',
           500: '#22c55e',
-          600: '#16a34a', // hijau utama (tombol, aktif)
+          600: '#16a34a', // primer — tombol, nav aktif
           700: '#15803d',
           800: '#166534',
           900: '#14532d',
@@ -29,22 +31,33 @@ export default {
           400: '#7c96eb',
           500: '#5872e0',
           600: '#3d54d4',
-          700: '#2d3fa8', // navy lembut
+          700: '#2d3fa8',
           800: '#1e2a7a',
-          900: '#151e54', // sidebar utama
+          900: '#151e54', // sidebar header
         },
         emas: {
+          50:  '#fffbeb',
+          100: '#fef3c7',
+          200: '#fde68a',
+          300: '#fcd34d',
           400: '#fbbf24',
-          500: '#f59e0b', // kuning emas aksen
+          500: '#f59e0b', // aksen kuning emas
           600: '#d97706',
+          700: '#b45309',
+          800: '#92400e',
         },
       },
+
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
       },
+
+      transitionDuration: {
+        250: '250ms',
+      },
+
       boxShadow: {
-        card: '0 1px 3px 0 rgba(0,0,0,.08), 0 1px 2px -1px rgba(0,0,0,.06)',
-        'card-hover': '0 4px 12px 0 rgba(0,0,0,.10)',
+        card: '0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04)',
       },
     },
   },

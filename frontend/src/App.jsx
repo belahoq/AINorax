@@ -14,7 +14,7 @@ import Templates      from './pages/Templates'
 import Settings       from './pages/Settings'
 import ComingSoon     from './pages/ComingSoon'
 
-// ProtectedRoute: redirect ke /login jika belum login
+// ProtectedRoute: redirect ke /login jika belum punya token
 function ProtectedRoute({ children }) {
   return getToken() ? children : <Navigate to="/login" replace />
 }
@@ -26,7 +26,7 @@ export default function App() {
         {/* Halaman publik */}
         <Route path="/login" element={<Login />} />
 
-        {/* Halaman terproteksi — semua di dalam Layout */}
+        {/* Semua halaman terproteksi — dibungkus Layout */}
         <Route
           path="/"
           element={
@@ -36,15 +36,25 @@ export default function App() {
           }
         >
           <Route index element={<Navigate to="/dashboard" replace />} />
-          <Route path="dashboard"       element={<Dashboard />} />
-          <Route path="buat-dokumen"    element={<CreateDocument />} />
-          <Route path="arsip"           element={<Archive />} />
-          <Route path="master-data"     element={<MasterData />} />
-          <Route path="template"        element={<Templates />} />
-          <Route path="pengaturan"      element={<Settings />} />
-          <Route path="coming-soon"     element={<ComingSoon />} />
-          {/* Fallback */}
-          <Route path="*"              element={<Navigate to="/dashboard" replace />} />
+
+          {/* === Fitur Utama === */}
+          <Route path="dashboard"    element={<Dashboard />} />
+          <Route path="buat-dokumen" element={<CreateDocument />} />
+          <Route path="arsip"        element={<Archive />} />
+          <Route path="template"     element={<Templates />} />
+
+          {/* === Administrasi === */}
+          <Route path="master-data"  element={<MasterData />} />
+          {/* Fitur berikut belum tersedia — tampilkan ComingSoon */}
+          <Route path="spmb"         element={<ComingSoon label="SPMB" />} />
+          <Route path="absensi-qr"   element={<ComingSoon label="Absensi QR" />} />
+          <Route path="inventaris"   element={<ComingSoon label="Inventaris" />} />
+
+          {/* === Sistem === */}
+          <Route path="pengaturan"   element={<Settings />} />
+
+          {/* Fallback — redirect ke dashboard */}
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Route>
       </Routes>
     </BrowserRouter>
