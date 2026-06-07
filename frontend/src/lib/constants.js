@@ -86,3 +86,106 @@ export const SESSION_KEY = 'sdentibaya_token'
 
 // === URL API (Cloudflare Worker) ===
 export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8787'
+
+// ============================================================
+// === DATA DUMMY — digunakan sementara sebelum backend aktif ===
+// ============================================================
+
+/** Statistik ringkasan untuk Dashboard */
+export const DUMMY_STATS = {
+  totalDokumen:    47,
+  suratKeluar:     18,
+  skPanitia:        6,
+  undanganRapat:    9,
+  beritaAcara:      8,
+  proposal:         6,
+  // perubahan dari bulan lalu (untuk label trend)
+  trend: {
+    totalDokumen: '+5',
+    suratKeluar:  '+3',
+    skPanitia:    '+1',
+    undanganRapat:'+2',
+    beritaAcara:  '0',
+    proposal:     '+1',
+  },
+}
+
+/** Daftar dokumen terbaru untuk tabel Dashboard */
+export const DUMMY_DOKUMEN_TERBARU = [
+  {
+    id: '1',
+    nomorSurat:    '012/UN/VI/2026',
+    jenisDokumen:  'Surat Undangan Rapat',
+    perihal:       'Rapat Koordinasi Persiapan Ujian Kelas VI',
+    tanggalBuat:   '2026-06-05',
+    dibuatOleh:    'Admin',
+    status:        'selesai',
+  },
+  {
+    id: '2',
+    nomorSurat:    '011/BA/VI/2026',
+    jenisDokumen:  'Berita Acara',
+    perihal:       'Serah Terima Pengelolaan Perpustakaan',
+    tanggalBuat:   '2026-06-03',
+    dibuatOleh:    'Admin',
+    status:        'selesai',
+  },
+  {
+    id: '3',
+    nomorSurat:    '010/SKP/V/2026',
+    jenisDokumen:  'SK Panitia',
+    perihal:       'Panitia Pelaksanaan Ujian Akhir Semester',
+    tanggalBuat:   '2026-05-28',
+    dibuatOleh:    'Admin',
+    status:        'selesai',
+  },
+  {
+    id: '4',
+    nomorSurat:    '009/PB/V/2026',
+    jenisDokumen:  'Surat Pemberitahuan Orang Tua',
+    perihal:       'Pemberitahuan Jadwal Ujian Semester Genap',
+    tanggalBuat:   '2026-05-20',
+    dibuatOleh:    'Admin',
+    status:        'selesai',
+  },
+  {
+    id: '5',
+    nomorSurat:    '008/PP/V/2026',
+    jenisDokumen:  'Proposal Kegiatan',
+    perihal:       'Proposal Kegiatan Pentas Seni Akhir Tahun',
+    tanggalBuat:   '2026-05-15',
+    dibuatOleh:    'Admin',
+    status:        'selesai',
+  },
+  {
+    id: '6',
+    nomorSurat:    '007/SK/V/2026',
+    jenisDokumen:  'Surat Keterangan',
+    perihal:       'Keterangan Masih Aktif Bersekolah',
+    tanggalBuat:   '2026-05-10',
+    dibuatOleh:    'Admin',
+    status:        'selesai',
+  },
+]
+
+/** Status sistem untuk section monitoring Dashboard */
+export const DUMMY_STATUS_SISTEM = [
+  {
+    id:      'frontend',
+    label:   'Frontend',
+    detail:  'Cloudflare Pages',
+    status:  'online',   // 'online' | 'offline' | 'unknown'
+  },
+  {
+    id:      'worker',
+    label:   'Worker API',
+    detail:  'Cloudflare Worker',
+    status:  'unknown',
+  },
+  {
+    id:      'gas',
+    label:   'Backend GAS',
+    detail:  'Google Apps Script',
+    status:  'unknown',
+  },
+]
