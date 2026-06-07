@@ -265,6 +265,31 @@
 
 ---
 
+### [BUGFIX] Format tanggal ISO di dokumen + tanggal tanda tangan tidak muncul
+- **Tanggal:** 2026-06-07
+- **Status:** ✅ Diperbaiki
+- **File:** `gas/Code.gs`
+- **Masalah 1 — Format tanggal ISO:**
+  Field bertipe `date` dari form frontend (seperti `tanggal`, `tanggalKegiatan`, `tanggalRapat`, `tanggalDitetapkan`) menghasilkan nilai format ISO `"2026-06-01"`. Nilai ini masuk ke `templateData` dan menggantikan placeholder di dokumen apa adanya — tampil sebagai `2026-06-01` bukan `01 Juni 2026`.
+- **Masalah 2 — Tanggal di atas tanda tangan tidak ada:**
+  Tidak ada placeholder `{{tanggalSurat}}` atau `{{tempatTanggalSurat}}` yang disiapkan untuk baris di atas tanda tangan pimpinan. Operator tidak punya cara memasukkan baris "Pringgabaya, 07 Juni 2026" ke template Docs.
+- **Solusi (keduanya di `createDocument()`):**
+  1. Setelah menggabungkan payload ke `templateData`, loop semua key dan konversi nilai yang cocok format `yyyy-MM-dd` ke format Indonesia menggunakan `formatTanggalIndonesia()`.
+  2. Tambah dua placeholder baru yang selalu tersedia:
+     - `{{tanggalSurat}}` = tanggal dokumen dibuat, format "07 Juni 2026"
+     - `{{tempatTanggalSurat}}` = "Pringgabaya, 07 Juni 2026" (siap pakai di atas TTD)
+  3. `buatDokumenBaru()` diupdate untuk memakai `tempatTanggalSurat` jika tersedia.
+- **Placeholder baru yang tersedia di template Google Docs:**
+  ```
+  {{tanggalSurat}}        → 07 Juni 2026
+  {{tempatTanggalSurat}}  → Pringgabaya, 07 Juni 2026
+  {{tanggalHariIni}}      → 07 Juni 2026  (sama, alias)
+  ```
+  Gunakan `{{tempatTanggalSurat}}` di template Docs pada baris di atas "Kepala Sekolah," untuk tanggal tanda tangan otomatis.
+- **Cara deploy fix ini:** Salin ulang `Code.gs` ke Google Apps Script Editor → Deploy ulang sebagai New Version.
+
+---
+
 ### [FITUR] Revisi Menu Template — Edit dan Clone Template
 - **Tanggal:** 2026-06-07
 - **Status:** ✅ Selesai
