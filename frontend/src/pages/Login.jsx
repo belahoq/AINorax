@@ -1,14 +1,11 @@
 // ============================================================
 // Login.jsx — Halaman login PIN admin
 // ============================================================
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { login } from '../lib/api'
 import { saveSession, isAuthenticated } from '../lib/auth'
 import { BRAND, SEKOLAH } from '../lib/constants'
-
-// Redirect jika sudah login
-import { useEffect } from 'react'
 
 const EyeIcon = ({ open }) => open ? (
   <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">

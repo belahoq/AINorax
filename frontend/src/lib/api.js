@@ -362,7 +362,7 @@ export async function saveSettings(payload) {
     return { message: 'Settings disimpan ke penyimpanan lokal (backend belum dikonfigurasi).' }
   }
 
-  const data = await gasRequest('saveSettings', payload)
+  await gasRequest('saveSettings', payload)
   return { message: 'Settings berhasil disimpan ke Google Sheets.' }
 }
 

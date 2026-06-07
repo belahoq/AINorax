@@ -5,13 +5,8 @@
 // ============================================================
 import { useState, useEffect, useCallback } from 'react'
 import { DEFAULT_MASTER_DATA } from '../lib/constants'
-import {
-  saveMasterData,
-  loadMasterData,
-  resetMasterData,
-  getMasterDataSavedAt,
-} from '../lib/storage'
-import { getSettings } from '../lib/api'
+import { saveMasterData, loadMasterData, resetMasterData, getMasterDataSavedAt } from '../lib/storage'
+import { getSettings, saveSettings } from '../lib/api'
 import FormField from '../components/FormField'
 import { useToast, ToastContainer } from '../components/Toast'
 
@@ -167,13 +162,12 @@ export default function MasterData() {
     if (errors[name]) setErrors(prev => ({ ...prev, [name]: '' }))
   }, [errors])
 
-  function handleSimpan(e) {
+  async function handleSimpan(e) {
     e.preventDefault()
     const errs = validate(form)
     if (Object.keys(errs).length > 0) {
       setErrors(errs)
       toast.error('Lengkapi field yang wajib diisi terlebih dahulu.')
-      // Scroll ke error pertama
       const firstErr = Object.keys(errs)[0]
       document.getElementById(`field-${firstErr}`)?.scrollIntoView({
         behavior: 'smooth', block: 'center',
@@ -181,20 +175,37 @@ export default function MasterData() {
       return
     }
     setSaving(true)
-    // Simulasi delay kecil (nanti ganti dengan API call ke Worker)
-    setTimeout(() => {
+    try {
+      // 1. Selalu simpan ke localStorage
       const ok = saveMasterData(form)
-      if (ok) {
-        const ts = fmtSavedAt(getMasterDataSavedAt())
-        setSavedAt(ts)
-        setDirty(false)
-        setErrors({})
-        toast.success('Data master berhasil disimpan ke penyimpanan lokal.')
-      } else {
+      if (!ok) {
         toast.error('Gagal menyimpan. Browser mungkin memblokir penyimpanan lokal.')
+        setSaving(false)
+        return
       }
+
+      // 2. Jika backend aktif, sinkronisasi ke GAS juga
+      if (import.meta.env.VITE_API_URL) {
+        try {
+          await saveSettings(form)
+          toast.success('Data master berhasil disimpan ke Google Sheets dan perangkat lokal.')
+        } catch (syncErr) {
+          // localStorage sudah tersimpan, GAS gagal — beri tahu tapi jangan block
+          toast.warning('Data disimpan di perangkat lokal. Sinkronisasi ke server gagal: ' + syncErr.message)
+        }
+      } else {
+        toast.success('Data master berhasil disimpan ke penyimpanan lokal.')
+      }
+
+      const ts = fmtSavedAt(getMasterDataSavedAt())
+      setSavedAt(ts)
+      setDirty(false)
+      setErrors({})
+    } catch (err) {
+      toast.error('Gagal menyimpan: ' + (err.message || 'Kesalahan tidak diketahui'))
+    } finally {
       setSaving(false)
-    }, 600)
+    }
   }
 
   function handleReset() {
