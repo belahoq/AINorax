@@ -72,9 +72,40 @@ src/
 PIN: `123456`  
 *(Nanti akan diambil dari ADMIN_PIN Cloudflare Worker env)*
 
+## Environment Variable
+
+Buat file `.env.local` di folder `frontend/` untuk mengarahkan API ke Worker:
+
+```bash
+# URL Cloudflare Worker
+# Development (wrangler dev): http://localhost:8787
+# Production : https://<nama-worker>.<akun>.workers.dev
+VITE_API_URL=http://localhost:8787
+```
+
+> Tanpa file ini, frontend akan otomatis menggunakan mode **dummy data** (tidak memanggil backend).
+
+## Menjalankan Full Stack Lokal
+
+Untuk menjalankan frontend + Worker sekaligus secara lokal:
+
+```bash
+# Terminal 1 — jalankan Cloudflare Worker
+cd worker
+wrangler dev
+# Worker berjalan di http://localhost:8787
+
+# Terminal 2 — jalankan React frontend
+cd frontend
+echo "VITE_API_URL=http://localhost:8787" > .env.local
+npm run dev
+# Frontend berjalan di http://localhost:5173
+```
+
 ## Catatan
 
 - Frontend hanya berkomunikasi dengan **Cloudflare Worker**, bukan langsung ke GAS
 - Semua teks UI menggunakan **Bahasa Indonesia**
 - Data dummy digunakan selama belum ada backend nyata
+- Lihat `worker/README.md` untuk panduan setup Worker lengkap
 ```

@@ -156,4 +156,22 @@
   - Preview kop surat: menampilkan logo dari URL jika diisi, tanda tangan digital dari URL jika diisi, dengan graceful fallback ke placeholder jika URL gagal load
   - Field aset digital (urlLogo, urlTtd, urlStempel) span 2 kolom di grid desktop
 
+### [TAHAP-07] Buat Cloudflare Worker sebagai API Proxy
+- **Tanggal:** 2026-06-07
+- **Status:** ✅ Selesai
+- **Deskripsi:** Membangun Cloudflare Worker sebagai API proxy antara frontend dan Google Apps Script. Mencakup 3 endpoint, autentikasi HMAC-SHA256, CORS, whitelist action, sanitasi secret, dan dokumentasi lengkap.
+- **File dibuat/diubah:**
+  - `worker/index.js` *(baru)* — entry point Worker: router, `handleHealth`, `handleLogin`, `handleGas`, helper `jsonResponse`, `withCors/handleCors`, `readBody` (limit 512KB), `generateToken`, `verifyToken`, `hmacSha256`, `timingSafeEqual`, `sleep`
+  - `worker/wrangler.toml.example` *(baru)* — template konfigurasi Wrangler: `[vars]` untuk `GAS_URL`+`ALLOWED_ORIGIN`, env `development`+`production`, instruksi `wrangler secret put`
+  - `worker/README.md` *(baru)* — dokumentasi lengkap: arsitektur, semua endpoint + schema request/response, tabel action GAS, langkah setup 1–7, tabel env vars, tabel keamanan, troubleshooting
+  - `frontend/README.md` *(diubah)* — tambah seksi `Environment Variable` (`.env.local`), seksi `Menjalankan Full Stack Lokal` (2 terminal), referensi ke `worker/README.md`
+- **Catatan:**
+  - Token session: format `<timestamp_hex>.<hmac_hex>` — tidak butuh state/DB, verifikasi dengan re-compute HMAC
+  - Token TTL: 8 jam — dikonfigurasi via `TOKEN_TTL_MS`
+  - `timingSafeEqual` menggunakan double-HMAC agar perbandingan string tidak rentan timing attack
+  - `GAS_SECRET` **tidak pernah** muncul di response ke frontend — ada sanitasi eksplisit
+  - Whitelist `ALLOWED_ACTIONS` di Worker mencegah request arbitrary action ke GAS
+  - `wrangler.toml` (aktif) ada di `.gitignore` — hanya `.example` yang di-commit
+  - Login delay 300ms saat PIN salah untuk memperlambat brute-force
+
 <!-- Entri berikutnya akan ditambahkan di bawah ini -->
