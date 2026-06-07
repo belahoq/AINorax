@@ -2,7 +2,7 @@
 // Templates.jsx — Halaman Kelola Template Dokumen
 // ============================================================
 import { useState, useEffect } from 'react'
-import { getTemplate, addTemplate, deleteTemplate } from '../lib/api'
+import { listTemplates, addTemplate, deleteTemplate } from '../lib/api'
 import { JENIS_DOKUMEN } from '../lib/constants'
 import FormField    from '../components/FormField'
 import EmptyState   from '../components/EmptyState'
@@ -22,8 +22,8 @@ export default function Templates() {
   const [konfirmHapus, setKonfirmHapus] = useState(null)
 
   useEffect(() => {
-    getTemplate()
-      .then((res) => setData(res.data || []))
+    listTemplates()
+      .then((arr) => setData(arr || []))
       .catch(() => toast.error('Gagal memuat template.'))
       .finally(() => setLoading(false))
   }, [])
@@ -47,8 +47,8 @@ export default function Templates() {
       })
       toast.success('Template berhasil ditambahkan.')
       // Muat ulang
-      const res = await getTemplate()
-      setData(res.data || [])
+      const arr = await listTemplates()
+      setData(arr || [])
       setForm(EMPTY_FORM)
       setShowForm(false)
     } catch (err) {

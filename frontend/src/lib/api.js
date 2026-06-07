@@ -367,6 +367,115 @@ export async function saveSettings(payload) {
 }
 
 // ============================================================
+// listTemplates — ambil daftar template
+// ============================================================
+
+/**
+ * Ambil daftar template dari GAS.
+ * Fallback ke data dummy jika backend tidak tersedia.
+ * @returns {Promise<Object[]>} array template
+ */
+export async function listTemplates() {
+  if (!BACKEND_CONFIGURED) {
+    await _delay(400)
+    // Dummy template untuk mode demo
+    return [
+      {
+        id: 'TMPL-001',
+        namaTemplate:  'Template Undangan Rapat',
+        jenisDokumen:  'undangan_rapat',
+        docsTemplateId: '',
+        variabel: ['nomorSurat', 'perihal', 'hari', 'tanggal', 'waktu', 'tempat'],
+        isActive: true,
+      },
+      {
+        id: 'TMPL-002',
+        namaTemplate:  'Template Berita Acara',
+        jenisDokumen:  'berita_acara',
+        docsTemplateId: '',
+        variabel: ['nomorBA', 'namaKegiatan', 'hari', 'tanggal', 'tempat'],
+        isActive: true,
+      },
+    ]
+  }
+
+  try {
+    const data = await gasRequest('listTemplates')
+    // Normalise dari format GAS ke format Templates.jsx
+    return (data?.templates || []).map(t => ({
+      id:             t.id,
+      namaTemplate:   t.nama,
+      jenisDokumen:   t.jenis,
+      docsTemplateId: t.docTemplateId,
+      variabel:       t.placeholders || [],
+      isActive:       t.isActive,
+    }))
+  } catch (err) {
+    console.warn('[api] listTemplates fallback ke dummy:', err.message)
+    return []
+  }
+}
+
+// Alias lama agar tidak ada import lain yang rusak
+export const getTemplate = listTemplates
+
+// ============================================================
+// saveTemplate — tambah atau update template
+// ============================================================
+
+/**
+ * Tambah atau update template di GAS.
+ * @param {Object} payload - { namaTemplate, jenisDokumen, docsTemplateId, variabel, id? }
+ * @returns {Promise<{ message: string }>}
+ * @throws {Error}
+ */
+export async function saveTemplate(payload) {
+  if (!BACKEND_CONFIGURED) {
+    await _delay(800)
+    return { message: 'Template berhasil disimpan (mode demo).' }
+  }
+
+  // Normalise nama field dari Templates.jsx ke format GAS
+  const gasPayload = {
+    id:             payload.id,
+    jenis:          payload.jenisDokumen,
+    nama:           payload.namaTemplate,
+    deskripsi:      payload.deskripsi || '',
+    docTemplateId:  payload.docsTemplateId,
+    placeholders:   Array.isArray(payload.variabel)
+                      ? payload.variabel
+                      : String(payload.variabel || '').split(',').map(v => v.trim()).filter(Boolean),
+    isActive:       payload.isActive !== false,
+  }
+
+  await gasRequest('saveTemplate', gasPayload)
+  return { message: 'Template berhasil disimpan.' }
+}
+
+// Alias lama
+export const addTemplate = saveTemplate
+
+// ============================================================
+// deleteTemplate — hapus template
+// ============================================================
+
+/**
+ * Hapus template dari GAS.
+ * @param {string} id - ID template
+ * @returns {Promise<{ message: string }>}
+ * @throws {Error}
+ */
+export async function deleteTemplate(id) {
+  if (!BACKEND_CONFIGURED) {
+    await _delay(600)
+    return { message: 'Template berhasil dihapus (mode demo).' }
+  }
+
+  await gasRequest('saveTemplate', { id, isActive: false, _delete: true })
+  return { message: 'Template berhasil dihapus.' }
+}
+
+// ============================================================
 // pingWorker — test koneksi Worker + GAS
 // (digunakan oleh Settings.jsx)
 // ============================================================
