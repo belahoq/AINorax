@@ -194,14 +194,14 @@ async function handleGas(request, env) {
   const ALLOWED_ACTIONS = [
     'ping',
     'getDashboardStats',
-    'buatDokumen',
-    'getArsipDokumen',
-    'hapusDokumen',
-    'getMasterData',
-    'saveMasterData',
-    'getTemplate',
-    'addTemplate',
-    'deleteTemplate',
+    'createDocument',
+    'listDocuments',
+    'getDocument',
+    'getSettings',
+    'saveSettings',
+    'listTemplates',
+    'saveTemplate',
+    'createLog',
   ]
 
   if (!ALLOWED_ACTIONS.includes(action)) {

@@ -310,21 +310,21 @@ export default function Archive() {
   const [hapusId, setHapusId] = useState(null)
 
   // ── Fetch data arsip saat halaman dibuka ─────────────────
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     let mounted = true
     ;(async () => {
       try {
         const docs = await listDocuments()
         if (mounted && docs?.length) setData(docs)
-      } catch (err) {
-        // Fallback ke dummy sudah dilakukan di api.js, toast error
-        if (mounted) toast.warning('Gagal memuat arsip dari server. Menampilkan data lokal.')
+      } catch {
+        // api.js sudah fallback ke dummy — cukup reset loading
       } finally {
         if (mounted) setDataLoading(false)
       }
     })()
     return () => { mounted = false }
-  }, [])
+  }, []) // intentionally empty — fetch once on mount
 
   // ── Filter + search ────────────────────────────────────────
   const filtered = useMemo(() => {

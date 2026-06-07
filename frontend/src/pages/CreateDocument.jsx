@@ -344,11 +344,17 @@ function StepHasil({ hasil, onBuatLagi }) {
         </a>
       </div>
 
-      {/* Info dummy */}
-      <p className="text-xs text-gray-400 max-w-xs leading-relaxed">
-        <span className="font-medium text-emas-600">Mode Simulasi:</span>{' '}
-        Link di atas adalah dummy. Sambungkan backend Worker &amp; GAS untuk generate dokumen nyata.
-      </p>
+      {/* Info mode */}
+      {hasil?.docsUrl?.includes('SIMULASI') ? (
+        <p className="text-xs text-gray-400 max-w-xs leading-relaxed">
+          <span className="font-medium text-emas-600">Mode Demo:</span>{' '}
+          Link di atas adalah simulasi. Hubungkan backend Worker dan GAS untuk generate dokumen nyata.
+        </p>
+      ) : (
+        <p className="text-xs text-hijau-600 max-w-xs leading-relaxed font-medium">
+          ✓ Dokumen tersimpan di Google Drive Anda.
+        </p>
+      )}
 
       <button onClick={onBuatLagi} className="btn-secondary text-sm">
         <IcoReset /> Buat Dokumen Lain

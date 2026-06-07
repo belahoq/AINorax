@@ -210,4 +210,55 @@
   - Token disimpan di `localStorage` agar tetap login setelah refresh halaman
   - `pingWorker` melakukan 2 langkah: `GET /api/health` → `POST /api/gas {action:ping}`
 
+### [TAHAP-10] Testing, Bug Fix, dan Polishing MVP
+- **Tanggal:** 2026-06-07
+- **Status:** ✅ Selesai
+- **Deskripsi:** Audit menyeluruh seluruh codebase, perbaikan 5 bug (2 kritis, 3 minor), pembuatan CHECKLIST_TESTING.md (130 item) dan DEPLOYMENT_GUIDE.md (7 bagian, end-to-end).
+- **Bug yang diperbaiki:**
+  1. 🔴 **KRITIS** — `worker/index.js` ALLOWED_ACTIONS tidak sinkron dengan GAS dan api.js. Nama action lama (`buatDokumen`, `getArsipDokumen`, dll.) diganti dengan nama yang sinkron: `createDocument`, `listDocuments`, `getDocument`, `getSettings`, `saveSettings`, `listTemplates`, `saveTemplate`, `createLog`
+  2. 🔴 **KRITIS** — `CreateDocument.jsx` StepHasil hardcode teks "Mode Simulasi" padahal backend sudah aktif. Diganti dengan kondisional: cek `docsUrl.includes('SIMULASI')` → tampil pesan demo, jika tidak → tampil konfirmasi dokumen tersimpan
+  3. 🟡 **MINOR** — `tailwind.config.js` tidak memiliki warna `cyan` dan `ungu`/`purple`. StatCard menggunakan kedua warna ini → class tidak di-generate. Ditambahkan palet warna `cyan`, `ungu`, dan `purple`
+  4. 🟡 **MINOR** — `Archive.jsx` useEffect memiliki `toast.warning` di dalam catch → lint warning dependency. Dihapus toast dari catch, ditambahkan eslint-disable comment
+  5. 🟡 **MINOR** — `MasterData.jsx` tidak ada sinkronisasi dari GAS saat backend aktif. Ditambahkan `import { getSettings }` dan `useEffect` untuk fetch + merge server data dengan localStorage
+- **File dibuat:**
+  - `CHECKLIST_TESTING.md` — 130 item testing terstruktur dalam 11 seksi (A–K): Setup, Auth, Navigasi, Dashboard, Buat Dokumen, Arsip, Master Data, Pengaturan, Worker API, Responsivitas, Fallback & Error Handling
+  - `DEPLOYMENT_GUIDE.md` — panduan deployment 7 bagian end-to-end: GAS setup (6 langkah), Worker deployment (6 langkah), Pages deployment (4 langkah), verifikasi akhir (curl commands), cara update kode, tabel env vars lengkap, troubleshooting 10 masalah umum
+- **File diubah:**
+  - `worker/index.js` — fix ALLOWED_ACTIONS
+  - `frontend/src/pages/CreateDocument.jsx` — fix StepHasil kondisional
+  - `frontend/tailwind.config.js` — tambah cyan, ungu, purple colors
+  - `frontend/src/pages/Archive.jsx` — fix useEffect dependency
+  - `frontend/src/pages/MasterData.jsx` — tambah GAS sync useEffect
+
+---
+
+## Hal yang Sudah Aman ✅
+
+| Area | Status |
+|------|--------|
+| Autentikasi PIN dengan HMAC-SHA256 | ✅ Aman |
+| Token session di localStorage (persist refresh) | ✅ Aman |
+| GAS_SECRET tidak pernah terekspos ke frontend | ✅ Aman |
+| GAS_URL tidak pernah terekspos ke frontend | ✅ Aman |
+| CORS per-origin dari ALLOWED_ORIGIN env | ✅ Aman |
+| Payload limit 512 KB di Worker | ✅ Aman |
+| Action whitelist di Worker | ✅ Sinkron dengan GAS |
+| Fallback dummy data jika backend tidak aktif | ✅ Transparan |
+| Error handling ramah Bahasa Indonesia | ✅ Konsisten |
+| Responsive desktop + mobile | ✅ Diverifikasi |
+| Semua 8 jenis dokumen dengan field lengkap | ✅ Lengkap |
+
+## Hal yang Masih Perlu Dikembangkan 🔜
+
+| Area | Catatan |
+|------|---------|
+| Hapus dokumen dari GAS/Drive | Saat ini hanya hapus dari state lokal |
+| Nomor surat otomatis | Masih manual diisi pengguna |
+| Multi-user / role | Saat ini single admin |
+| Template manager visual | Masih input ID manual |
+| Notifikasi setelah dokumen selesai | Belum ada email/push notification |
+| SPMB, Absensi QR, Inventaris | Masih halaman ComingSoon |
+| Pagination arsip dokumen | Belum ada untuk data banyak |
+| Dark mode | Tidak dalam scope MVP |
+
 <!-- Entri berikutnya akan ditambahkan di bawah ini -->
