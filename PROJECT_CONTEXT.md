@@ -79,6 +79,7 @@ Response JSON kembali ke Worker → Frontend
 | 2026-06-07 | Tailwind CSS tanpa library UI berat                                       | Bundle ringan, mudah dikustomisasi, tidak ada ketergantungan  |
 | 2026-06-07 | Login berbasis PIN (ADMIN_PIN di Worker env)                              | Sederhana untuk konteks sekolah, tidak perlu OAuth kompleks   |
 | 2026-06-07 | Google Docs sebagai generator dokumen (bukan HTML-to-PDF)                 | Format dokumen rapi, sudah familiar, mudah diedit template-nya|
+| 2026-06-07 | Edit dan Clone template dilakukan di frontend, GAS tidak diubah           | `saveTemplate` GAS sudah mendukung upsert (insert jika tanpa `id`, update jika ada `id`) — tidak perlu action baru |
 
 ---
 

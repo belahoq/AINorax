@@ -265,6 +265,32 @@
 
 ---
 
+### [FITUR] Revisi Menu Template — Edit dan Clone Template
+- **Tanggal:** 2026-06-07
+- **Status:** ✅ Selesai
+- **Deskripsi:** Menambahkan fitur Edit dan Clone (Duplikat) pada halaman Template Dokumen. Sebelumnya hanya ada Tambah dan Hapus. Tidak ada perubahan di GAS karena `saveTemplate` sudah mendukung upsert berdasarkan keberadaan `id`.
+- **File diubah:**
+  - `frontend/src/lib/api.js` — tambah dua fungsi export baru:
+    - `editTemplate(id, payload)` — wrapper `saveTemplate` dengan `id`, untuk update template existing
+    - `cloneTemplate(tmpl)` — wrapper `saveTemplate` tanpa `id`, nama otomatis "Salinan dari ...", untuk duplikat template
+  - `frontend/src/pages/Templates.jsx` — rebuild lengkap:
+    - Komponen `TemplateForm` — form reusable dipakai oleh Tambah dan Edit
+    - Komponen `ModalEdit` — modal overlay pre-fill dengan data template terpilih, validasi, toast error lokal
+    - Komponen `TemplateCard` — kartu satu template dengan 4 tombol aksi: Buka Docs, Edit (kuning), Duplikat (navy), Hapus (merah)
+    - State `tmplEdit` — menyimpan objek template yang sedang diedit
+    - Handler `handleSimpanEdit(formBaru)` — panggil `editTemplate()`, reload data, tutup modal
+    - Handler `handleClone(tmpl)` — panggil `cloneTemplate()`, reload data, toast sukses dengan nama duplikat
+    - Panduan cara pakai template (tampil saat data kosong)
+    - Info jumlah template + status "Memproses..." saat aksi berjalan
+    - Modal konfirmasi hapus yang diperbarui
+- **Keputusan teknis:**
+  - GAS tidak perlu diubah — `saveTemplate` di GAS sudah mendukung insert (tanpa `id`) dan update (dengan `id`) dalam satu handler
+  - Clone dilakukan sepenuhnya di frontend: payload tanpa `id` → GAS membuat entri baru
+  - `variabelToString()` helper memastikan array variabel diubah ke string CSV saat pre-fill form Edit
+  - Optimistic update pada Hapus (langsung hapus dari state lokal sebelum API selesai)
+
+---
+
 ### [BUGFIX] Login production selalu masuk dummy mode meski VITE_API_URL sudah diset di Cloudflare Pages
 - **Tanggal:** 2026-06-07
 - **Status:** ✅ Diperbaiki
