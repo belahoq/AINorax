@@ -1236,11 +1236,27 @@ function initSpreadsheet() {
       }
     });
 
-    Logger.log('[initSpreadsheet] Selesai. Semua sheet sudah siap.');
-    SpreadsheetApp.getUi().alert('Inisialisasi berhasil! Semua sheet sudah siap digunakan.');
+    var pesanSukses = '[initSpreadsheet] Selesai. Semua sheet sudah siap digunakan.';
+    Logger.log(pesanSukses);
+
+    // Coba tampilkan dialog jika dijalankan dari konteks Spreadsheet UI.
+    // Jika dijalankan dari Apps Script Editor, getUi() tidak tersedia —
+    // cukup baca hasilnya di Execution Log (View → Logs).
+    try {
+      SpreadsheetApp.getUi().alert('Inisialisasi berhasil! Semua sheet sudah siap digunakan.');
+    } catch (uiErr) {
+      // Dijalankan dari Script Editor — tidak ada UI, tidak apa-apa.
+      Logger.log('[initSpreadsheet] Catatan: dialog tidak ditampilkan (jalankan dari Editor). Cek Execution Log.');
+    }
 
   } catch (err) {
     Logger.log('[initSpreadsheet] Error: ' + err);
-    SpreadsheetApp.getUi().alert('Error: ' + err);
+
+    // Sama: coba tampilkan dialog, tapi tidak wajib berhasil.
+    try {
+      SpreadsheetApp.getUi().alert('Error saat inisialisasi: ' + err);
+    } catch (uiErr) {
+      Logger.log('[initSpreadsheet] Error (tanpa dialog): ' + err);
+    }
   }
 }
