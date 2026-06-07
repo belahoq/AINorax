@@ -141,4 +141,19 @@
   - Salin link menggunakan `navigator.clipboard.writeText` dengan fallback
   - Hapus hanya menghapus dari state lokal — akan diganti ke API saat backend aktif
 
+### [TAHAP-06] Bangun Halaman Master Data Sekolah
+- **Tanggal:** 2026-06-07
+- **Status:** ✅ Selesai
+- **Deskripsi:** Membangun halaman Master Data Sekolah lengkap dengan form 4 seksi collapsible, validasi, simpan/load/reset ke localStorage, banner status perubahan, preview kop surat modal, dan helper storage terpusat.
+- **File dibuat/diubah:**
+  - `frontend/src/lib/storage.js` *(baru)* — helper localStorage: `STORAGE_KEYS`, `storageSet/Get/Remove/Available`, `saveMasterData`, `loadMasterData`, `resetMasterData`, `getMasterDataSavedAt`
+  - `frontend/src/lib/constants.js` — tambah `DEFAULT_MASTER_DATA` (18 field: identitas sekolah, brand, kepsek, aset digital)
+  - `frontend/src/pages/MasterData.jsx` — rebuild lengkap: 4 seksi collapsible (`SeksiCard`), grid 2 kolom, validasi field wajib + scroll ke error, banner dirty/saved, simpan ke localStorage, modal `ModalPreviewKop` (kop surat dengan logo/ttd/stempel placeholder), modal `ModalKonfirmasiReset`, ikon SVG inline semua
+- **Catatan:**
+  - `storage.js` adalah helper generik — bisa dipakai untuk fitur lain (template, preferensi user) dengan tambah key baru di `STORAGE_KEYS`
+  - Form inisialisasi dari localStorage (jika ada) → fallback ke `DEFAULT_MASTER_DATA`
+  - Payload `form` sudah siap dikirim ke GAS action `saveMasterData` — tinggal ganti `setTimeout` dengan API call ke Worker
+  - Preview kop surat: menampilkan logo dari URL jika diisi, tanda tangan digital dari URL jika diisi, dengan graceful fallback ke placeholder jika URL gagal load
+  - Field aset digital (urlLogo, urlTtd, urlStempel) span 2 kolom di grid desktop
+
 <!-- Entri berikutnya akan ditambahkan di bawah ini -->

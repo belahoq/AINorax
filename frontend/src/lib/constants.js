@@ -476,6 +476,40 @@ export const DOC_FIELDS = {
   },
 }
 
+// ============================================================
+// === DEFAULT MASTER DATA SEKOLAH
+// Digunakan sebagai nilai awal sebelum admin menyimpan perubahan.
+// Struktur ini HARUS sinkron dengan form di MasterData.jsx
+// dan dengan payload yang dikirim ke GAS action 'saveMasterData'.
+// ============================================================
+export const DEFAULT_MASTER_DATA = {
+  // — Identitas Sekolah —
+  namaSekolah:   'SD Negeri 3 Pringgabaya',
+  npsn:          '50205367',
+  alamat:        'Jl. Raya Pringgabaya',
+  kecamatan:     'Pringgabaya',
+  kabupaten:     'Lombok Timur',
+  provinsi:      'Nusa Tenggara Barat',
+  telepon:       '(0376) 21XXX',
+  website:       'www.sdn3pringgabaya.sch.id',
+  email:         'sdn3pringgabaya@gmail.com',
+
+  // — Brand —
+  brand:         'SDENTIBAYA',
+  slogan:        'SDENTIBAYA MELAJU',
+  tahunAjaran:   '2025/2026',
+
+  // — Kepala Sekolah —
+  namaKepsek:    'Maturiadi, S.Pd.',
+  nipKepsek:     '19XXXXXXXXXXXXXX',
+  pangkatKepsek: 'Pembina, IV/a',
+
+  // — Aset Digital (URL, opsional) —
+  urlLogo:          '',   // URL logo sekolah
+  urlTtd:           '',   // URL tanda tangan digital kepsek (opsional)
+  urlStempel:       '',   // URL stempel/cap sekolah (opsional)
+}
+
 // === Kunci sessionStorage ===
 export const SESSION_KEY = 'sdentibaya_token'
 
