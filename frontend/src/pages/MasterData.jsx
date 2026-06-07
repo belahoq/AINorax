@@ -11,6 +11,7 @@ import {
   resetMasterData,
   getMasterDataSavedAt,
 } from '../lib/storage'
+import { getSettings } from '../lib/api'
 import FormField from '../components/FormField'
 import { useToast, ToastContainer } from '../components/Toast'
 
@@ -134,6 +135,28 @@ export default function MasterData() {
   const [showPreview, setShowPreview] = useState(false)
   const [showReset,   setShowReset]   = useState(false)
   const [dirty,       setDirty]       = useState(false)  // ada perubahan belum disimpan
+
+  // Sinkronisasi dari backend GAS jika tersedia
+  useEffect(() => {
+    let mounted = true
+    ;(async () => {
+      try {
+        const serverData = await getSettings()
+        if (mounted && serverData && Object.keys(serverData).length > 0) {
+          // Merge: data server menimpa default, localStorage menimpa server
+          const localData = loadMasterData()
+          setForm(prev => ({
+            ...DEFAULT_MASTER_DATA,
+            ...serverData,
+            ...(localData || {}),
+          }))
+        }
+      } catch {
+        // Tetap gunakan data lokal/default
+      }
+    })()
+    return () => { mounted = false }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Handlers ────────────────────────────────────────────────
   const handleChange = useCallback((e) => {
