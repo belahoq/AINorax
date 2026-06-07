@@ -265,6 +265,27 @@
 
 ---
 
+### [BUGFIX] Build error — "getTemplate" is not exported by api.js
+- **Tanggal:** 2026-06-07
+- **Status:** ✅ Diperbaiki
+- **Error:** `"getTemplate" is not exported by "src/lib/api.js", imported by "src/pages/Templates.jsx"`
+- **Penyebab:**
+  Saat TAHAP-09 `api.js` di-rebuild untuk integrasi Worker, fungsi template lama (`getTemplate`, `addTemplate`, `deleteTemplate`) tidak ikut dipindahkan. Fungsi-fungsi ini hilang dari file, tetapi `Templates.jsx` masih mengimpornya — menyebabkan Rollup gagal saat `npm run build`.
+- **Solusi:**
+  1. **`api.js`** — Tambahkan 3 export baru:
+     - `listTemplates()` — fetch `listTemplates` dari GAS, normalise response, fallback dummy
+     - `saveTemplate(payload)` — normalise field nama (Templates.jsx ↔ GAS berbeda nama), kirim ke GAS
+     - `deleteTemplate(id)` — soft-delete via `saveTemplate` dengan flag `isActive: false`
+     - Ditambahkan juga alias `getTemplate = listTemplates` dan `addTemplate = saveTemplate` untuk kompatibilitas
+  2. **`Templates.jsx`** — Update 3 lokasi:
+     - Baris 5: `import { getTemplate, ... }` → `import { listTemplates, ... }`
+     - `useEffect`: `getTemplate().then(res => setData(res.data || []))` → `listTemplates().then(arr => setData(arr || []))`
+     - `handleTambah`: `getTemplate().then(...)` → `listTemplates().then(arr => setData(arr || []))`
+- **Catatan:**
+  Format response `listTemplates()` di `api.js` langsung mengembalikan array (bukan `{ data: [...] }`), berbeda dari versi lama yang mengembalikan `{ data: [...] }`. Perubahan ini konsisten dengan fungsi API lain seperti `listDocuments()`.
+
+---
+
 ### [BUGFIX] initSpreadsheet — Cannot call SpreadsheetApp.getUi() from this context
 - **Tanggal:** 2026-06-07
 - **Status:** ✅ Diperbaiki
