@@ -74,4 +74,26 @@
   - Warna: hijau (#16a34a) utama, navy (#151e54) sidebar, emas (#f59e0b) aksen
   - Responsive: sidebar geser di mobile, layout 2 kolom di desktop
 
+### [TAHAP-02] Sempurnakan Layout Utama Admin Panel
+- **Tanggal:** 2026-06-07
+- **Status:** ✅ Selesai
+- **Deskripsi:** Memperbaiki dan menyempurnakan semua komponen layout utama. Menambah 3 menu baru (SPMB, Absensi QR, Inventaris), badge MVP, branding SDENTIBAYA MELAJU, kelompok menu sidebar, dan polish visual seluruh komponen.
+- **File dibuat/diubah:**
+  - `frontend/src/lib/constants.js` — MENU_GROUPS (3 grup bertingkat), BRAND.versi + BRAND.produk, MENU_ITEMS flat list
+  - `frontend/src/App.jsx` — tambah route: /spmb, /absensi-qr, /inventaris (→ ComingSoon dengan label prop)
+  - `frontend/src/components/Sidebar.jsx` — logo SD, badge MVP, slogan "SDENTIBAYA MELAJU", menu dikelompokkan 3 grup, ikon baru (users, qr-code, box), badge "Segera" untuk Coming Soon, overlay animasi mobile
+  - `frontend/src/components/Topbar.jsx` — nama app "SDENTIBAYA AdminKit" + badge MVP di kanan, page title + nama sekolah, page title lengkap untuk semua route baru
+  - `frontend/src/components/Layout.jsx` — auto-tutup sidebar saat navigasi, cegah scroll body saat sidebar mobile terbuka, max-width konten
+  - `frontend/src/components/Toast.jsx` — redesign: border-left colored, animasi slide-in dari kanan, title per tipe, tombol dismiss lebih clean
+  - `frontend/src/components/LoadingState.jsx` — spinner dua-layer (track + arc berputar), prop size (sm/md/lg)
+  - `frontend/src/components/EmptyState.jsx` — rounded-2xl icon container, prop compact
+  - `frontend/src/pages/ComingSoon.jsx` — menerima prop label, badge nama fitur, info versi MVP
+  - `frontend/src/styles/index.css` — utility .bg-white/8, .border-white/8 untuk sidebar dark
+  - `frontend/tailwind.config.js` — warna emas-50/100 tambahan, transitionDuration 250ms, navy-50
+- **Catatan:**
+  - Sidebar menggunakan warna `#0f1729` (lebih gelap dari navy-900) untuk tampilan lebih premium
+  - Menu "SPMB", "Absensi QR", "Inventaris" menampilkan badge "Segera" dan redirect ke ComingSoon
+  - Toast baru menggunakan desain border-kiri berwarna (lebih ringan dari background penuh)
+  - Layout auto-close sidebar saat pindah halaman (UX mobile lebih baik)
+
 <!-- Entri berikutnya akan ditambahkan di bawah ini -->

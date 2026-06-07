@@ -1,31 +1,31 @@
 // ============================================================
-// Topbar.jsx — Header atas halaman (judul + tombol menu mobile)
+// Topbar.jsx — Header atas halaman
 // ============================================================
 import { useLocation } from 'react-router-dom'
-import { MENU_ITEMS, SEKOLAH } from '../lib/constants'
+import { BRAND, SEKOLAH } from '../lib/constants'
 
-// Peta path → judul halaman
+// Peta path → judul halaman (lengkap termasuk route baru)
 const PAGE_TITLES = {
-  '/dashboard':    'Dashboard',
-  '/buat-dokumen': 'Buat Dokumen',
-  '/arsip':        'Arsip Dokumen',
-  '/master-data':  'Master Data Sekolah',
-  '/template':     'Template Dokumen',
-  '/pengaturan':   'Pengaturan',
+  '/dashboard':   'Dashboard',
+  '/buat-dokumen':'Buat Dokumen',
+  '/arsip':       'Arsip Dokumen',
+  '/template':    'Template Dokumen',
+  '/master-data': 'Master Data Sekolah',
+  '/spmb':        'SPMB',
+  '/absensi-qr':  'Absensi QR',
+  '/inventaris':  'Inventaris',
+  '/pengaturan':  'Pengaturan',
 }
 
-// Ikon hamburger
-const MenuIcon = () => (
-  <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-    <line x1="3" y1="6"  x2="21" y2="6" />
-    <line x1="3" y1="12" x2="21" y2="12" />
-    <line x1="3" y1="18" x2="21" y2="18" />
+// --- Ikon ---
+const HamburgerIcon = () => (
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+    <path strokeLinecap="round" d="M4 6h16M4 12h16M4 18h16" />
   </svg>
 )
 
-// Ikon bell notifikasi
 const BellIcon = () => (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+  <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
     <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
     <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
   </svg>
@@ -33,53 +33,79 @@ const BellIcon = () => (
 
 export default function Topbar({ onMenuClick }) {
   const { pathname } = useLocation()
-  const pageTitle = PAGE_TITLES[pathname] || 'SDENTIBAYA AdminKit'
+  const pageTitle = PAGE_TITLES[pathname] ?? 'SDENTIBAYA AdminKit'
 
   return (
-    <header className="sticky top-0 z-10 bg-white border-b border-gray-100 shadow-sm">
-      <div className="flex items-center justify-between h-14 px-4 lg:px-6">
+    <header className="sticky top-0 z-10 h-14 bg-white border-b border-gray-100 flex items-center
+                       px-4 lg:px-6 gap-3 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
 
-        {/* Kiri: tombol hamburger (mobile) + judul halaman */}
-        <div className="flex items-center gap-3">
-          {/* Tombol menu hanya muncul di mobile */}
-          <button
-            onClick={onMenuClick}
-            className="p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors lg:hidden"
-            aria-label="Buka menu"
-          >
-            <MenuIcon />
-          </button>
-          <div>
-            <h2 className="text-base font-semibold text-gray-800 leading-tight">
+      {/* === Kiri: hamburger (mobile) + judul halaman === */}
+      <div className="flex items-center gap-3 flex-1 min-w-0">
+
+        {/* Hamburger — hanya tampil di mobile */}
+        <button
+          onClick={onMenuClick}
+          className="p-1.5 -ml-1 rounded-lg text-gray-500 hover:bg-gray-100
+                     active:bg-gray-200 transition-colors lg:hidden shrink-0"
+          aria-label="Buka menu navigasi"
+        >
+          <HamburgerIcon />
+        </button>
+
+        {/* Judul halaman */}
+        <div className="min-w-0">
+          <div className="flex items-center gap-2">
+            <h2 className="text-[15px] font-semibold text-gray-800 leading-none truncate">
               {pageTitle}
             </h2>
-            {/* Nama sekolah hanya tampil di layar sedang ke atas */}
-            <p className="hidden sm:block text-xs text-gray-400 leading-tight">
-              {SEKOLAH.nama}
-            </p>
           </div>
+          {/* Sub-judul: nama sekolah — hanya di sm ke atas */}
+          <p className="hidden sm:block text-[11px] text-gray-400 mt-0.5 leading-none truncate">
+            {SEKOLAH.nama}
+          </p>
         </div>
-
-        {/* Kanan: info + avatar admin */}
-        <div className="flex items-center gap-2">
-          {/* Tombol notifikasi (placeholder) */}
-          <button
-            className="p-2 rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
-            aria-label="Notifikasi"
-          >
-            <BellIcon />
-          </button>
-
-          {/* Avatar admin */}
-          <div className="flex items-center gap-2 pl-2 border-l border-gray-100">
-            <div className="w-8 h-8 rounded-full bg-hijau-600 flex items-center justify-center">
-              <span className="text-xs font-bold text-white">A</span>
-            </div>
-            <span className="hidden sm:block text-sm font-medium text-gray-700">Admin</span>
-          </div>
-        </div>
-
       </div>
+
+      {/* === Kanan: branding + notif + avatar === */}
+      <div className="flex items-center gap-1 shrink-0">
+
+        {/* Nama app + badge — hanya tampil di lg */}
+        <div className="hidden lg:flex items-center gap-2 mr-3">
+          <span className="text-[13px] font-bold text-gray-700 tracking-wide">
+            {BRAND.nama} <span className="text-gray-400 font-medium">{BRAND.produk}</span>
+          </span>
+          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold
+                           bg-emas-500/15 text-emas-600 border border-emas-500/25
+                           uppercase tracking-wide leading-none">
+            {BRAND.versi}
+          </span>
+        </div>
+
+        {/* Divider */}
+        <div className="hidden lg:block w-px h-5 bg-gray-200 mr-1" />
+
+        {/* Tombol notifikasi */}
+        <button
+          className="p-2 rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-600
+                     transition-colors"
+          aria-label="Notifikasi"
+        >
+          <BellIcon />
+        </button>
+
+        {/* Avatar + nama admin */}
+        <div className="flex items-center gap-2 pl-2 ml-1 border-l border-gray-100">
+          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-hijau-500 to-hijau-700
+                          flex items-center justify-center shadow-sm shrink-0">
+            <span className="text-[11px] font-bold text-white">A</span>
+          </div>
+          <div className="hidden sm:block leading-none">
+            <p className="text-[13px] font-semibold text-gray-700">Admin</p>
+            <p className="text-[10px] text-gray-400 mt-0.5">Administrator</p>
+          </div>
+        </div>
+      </div>
+
     </header>
   )
 }
