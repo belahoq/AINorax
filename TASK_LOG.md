@@ -111,4 +111,19 @@
   - Status sistem: Frontend=online (hijau), Worker & GAS=unknown (abu) — akan aktif setelah backend dikonfigurasi
   - Semua data dari `DUMMY_*` di `constants.js` — zero API call
 
+### [TAHAP-04] Bangun Halaman Buat Dokumen dengan Form Dinamis
+- **Tanggal:** 2026-06-07
+- **Status:** ✅ Selesai
+- **Deskripsi:** Membangun halaman Buat Dokumen dengan 4-step wizard: pilih jenis → isi form → preview → selesai. Form dinamis berubah sesuai jenis dokumen yang dipilih. Validasi field wajib, ringkasan preview, dan simulasi generate.
+- **File dibuat/diubah:**
+  - `frontend/src/lib/constants.js` — tambah `DOC_FIELDS` (konfigurasi field 8 jenis dokumen dalam struktur groups), `PENANDA_TANGAN_OPTIONS`
+  - `frontend/src/components/FormField.jsx` — tambah `type=radio-group`, `type=checkbox`, label `(opsional)`, error dengan ikon, hint styling
+  - `frontend/src/pages/CreateDocument.jsx` — rebuild lengkap: 4-step wizard, `StepPilihJenis` (grid kartu 8 jenis berwarna), `StepIsiForm` (form dinamis grouped), `StepPreview` (ringkasan tabel + info sekolah), `StepHasil` (sukses + link dummy), `StepBar` indicator, validasi field wajib + scroll ke error pertama, simulasi generate 1.8s
+- **Catatan:**
+  - `DOC_FIELDS` menggunakan struktur `groups[]` sehingga form bisa dikelompokkan per seksi (Identitas Surat / Waktu & Tempat / Isi Surat / dll.)
+  - Payload generate sudah disiapkan lengkap (termasuk data sekolah) — tinggal ganti `setTimeout` dengan `buatDokumen()` dari `api.js` saat backend siap
+  - Validasi hanya field `required: true`, field `optional: true` tidak divalidasi
+  - Simulasi delay 1.8 detik dengan spinner saat "Membuat Dokumen..."
+  - `console.log` payload aktif di mode DEV untuk debugging
+
 <!-- Entri berikutnya akan ditambahkan di bawah ini -->
