@@ -81,6 +81,401 @@ export const DAFTAR_KELAS = [
   'Kelas VI-A',  'Kelas VI-B',
 ]
 
+// ============================================================
+// === KONFIGURASI FIELD PER JENIS DOKUMEN
+// Digunakan oleh CreateDocument.jsx untuk form dinamis.
+// type: 'text' | 'date' | 'time' | 'textarea' | 'select' | 'divider'
+// group: string — opsional, nama grup/seksi di dalam form
+// optional: true — tampilkan label "(opsional)"
+// ============================================================
+
+/** Opsi penanda tangan yang umum digunakan */
+export const PENANDA_TANGAN_OPTIONS = [
+  { value: 'kepala_sekolah', label: 'Kepala Sekolah — Maturiadi, S.Pd.' },
+  { value: 'wakil_kepsek',   label: 'Wakil Kepala Sekolah' },
+  { value: 'bendahara',      label: 'Bendahara Sekolah' },
+  { value: 'operator',       label: 'Operator / Staf TU' },
+]
+
+export const DOC_FIELDS = {
+  // ----------------------------------------------------------
+  // 1. SURAT UNDANGAN RAPAT
+  // ----------------------------------------------------------
+  undangan_rapat: {
+    label: 'Surat Undangan Rapat',
+    icon:  'bell',
+    color: 'hijau',
+    groups: [
+      {
+        title: 'Identitas Surat',
+        fields: [
+          { name: 'nomorSurat', label: 'Nomor Surat', type: 'text',
+            placeholder: '001/UN/VI/2026', required: true,
+            hint: 'Format: nomor/kode/bulan romawi/tahun' },
+          { name: 'lampiran',   label: 'Lampiran', type: 'text',
+            placeholder: '1 (satu) lembar', optional: true },
+          { name: 'perihal',    label: 'Perihal', type: 'text',
+            placeholder: 'Undangan Rapat Koordinasi', required: true },
+          { name: 'tujuan',     label: 'Tujuan Undangan', type: 'textarea', rows: 3,
+            placeholder: 'Yth.\nBapak/Ibu Guru dan Staf\nSD Negeri 3 Pringgabaya', required: true },
+        ],
+      },
+      {
+        title: 'Waktu & Tempat',
+        fields: [
+          { name: 'hari',     label: 'Hari',    type: 'text',
+            placeholder: 'Senin', required: true },
+          { name: 'tanggal',  label: 'Tanggal', type: 'date', required: true },
+          { name: 'waktu',    label: 'Waktu',   type: 'text',
+            placeholder: '09.00 WITA s.d. selesai', required: true },
+          { name: 'tempat',   label: 'Tempat',  type: 'text',
+            placeholder: 'Ruang Kepala Sekolah SD Negeri 3 Pringgabaya', required: true },
+          { name: 'agenda',   label: 'Agenda Rapat', type: 'textarea', rows: 3,
+            placeholder: '1. Pembukaan\n2. Pembahasan agenda\n3. Penutup', required: true },
+        ],
+      },
+      {
+        title: 'Isi Surat',
+        fields: [
+          { name: 'isiPembuka', label: 'Kalimat Pembuka', type: 'textarea', rows: 2,
+            placeholder: 'Dengan hormat, bersama surat ini kami mengundang Bapak/Ibu...',
+            optional: true },
+          { name: 'isiPenutup', label: 'Kalimat Penutup', type: 'textarea', rows: 2,
+            placeholder: 'Demikian undangan ini kami sampaikan, atas kehadiran Bapak/Ibu kami ucapkan terima kasih.',
+            optional: true },
+          { name: 'penandaTangan', label: 'Penanda Tangan', type: 'select',
+            options: PENANDA_TANGAN_OPTIONS, required: true },
+        ],
+      },
+    ],
+  },
+
+  // ----------------------------------------------------------
+  // 2. SURAT PEMBERITAHUAN ORANG TUA
+  // ----------------------------------------------------------
+  pemberitahuan_ortu: {
+    label: 'Surat Pemberitahuan Orang Tua',
+    icon:  'mail',
+    color: 'navy',
+    groups: [
+      {
+        title: 'Identitas Surat',
+        fields: [
+          { name: 'nomorSurat', label: 'Nomor Surat', type: 'text',
+            placeholder: '002/PB/VI/2026', required: true },
+          { name: 'perihal',    label: 'Perihal', type: 'text',
+            placeholder: 'Pemberitahuan Kegiatan Ujian Akhir Semester', required: true },
+        ],
+      },
+      {
+        title: 'Detail Kegiatan',
+        fields: [
+          { name: 'namaKegiatan',  label: 'Nama Kegiatan', type: 'text',
+            placeholder: 'Ujian Akhir Semester Genap', required: true },
+          { name: 'tanggalKegiatan', label: 'Tanggal Kegiatan', type: 'date', required: true },
+          { name: 'tempatKegiatan',  label: 'Tempat Kegiatan', type: 'text',
+            placeholder: 'SD Negeri 3 Pringgabaya', required: true },
+          { name: 'namaSiswa', label: 'Nama Siswa (jika spesifik)', type: 'text',
+            placeholder: 'Kosongkan jika untuk seluruh siswa', optional: true },
+        ],
+      },
+      {
+        title: 'Isi Surat',
+        fields: [
+          { name: 'isiPemberitahuan', label: 'Isi Pemberitahuan', type: 'textarea', rows: 5,
+            placeholder: 'Dengan hormat, kami sampaikan bahwa sekolah akan menyelenggarakan...',
+            required: true },
+          { name: 'penutup', label: 'Kalimat Penutup', type: 'textarea', rows: 2,
+            placeholder: 'Demikian pemberitahuan ini kami sampaikan. Atas perhatian Bapak/Ibu kami ucapkan terima kasih.',
+            optional: true },
+          { name: 'penandaTangan', label: 'Penanda Tangan', type: 'select',
+            options: PENANDA_TANGAN_OPTIONS, required: true },
+        ],
+      },
+    ],
+  },
+
+  // ----------------------------------------------------------
+  // 3. SURAT PERSETUJUAN WALI MURID
+  // ----------------------------------------------------------
+  persetujuan_wali: {
+    label: 'Surat Persetujuan Wali Murid',
+    icon:  'users',
+    color: 'emas',
+    groups: [
+      {
+        title: 'Identitas Surat',
+        fields: [
+          { name: 'nomorSurat', label: 'Nomor Surat', type: 'text',
+            placeholder: '003/PST/VI/2026', required: true },
+          { name: 'perihal',    label: 'Perihal Persetujuan', type: 'text',
+            placeholder: 'Persetujuan Keikutsertaan Kegiatan Wisata Edukasi', required: true },
+        ],
+      },
+      {
+        title: 'Data Siswa',
+        fields: [
+          { name: 'namaSiswa', label: 'Nama Siswa', type: 'text', required: true },
+          { name: 'kelas',     label: 'Kelas', type: 'select',
+            options: DAFTAR_KELAS.map(k => ({ value: k, label: k })), required: true },
+          { name: 'namaWali',  label: 'Nama Wali Murid', type: 'text', required: true },
+        ],
+      },
+      {
+        title: 'Isi Surat',
+        fields: [
+          { name: 'isiPersetujuan', label: 'Isi / Rincian Persetujuan', type: 'textarea', rows: 5,
+            placeholder: 'Kami yang bertanda tangan di bawah ini menyatakan persetujuan terhadap...',
+            required: true },
+          { name: 'penandaTangan', label: 'Penanda Tangan Sekolah', type: 'select',
+            options: PENANDA_TANGAN_OPTIONS, required: true },
+        ],
+      },
+    ],
+  },
+
+  // ----------------------------------------------------------
+  // 4. SURAT KETERANGAN
+  // ----------------------------------------------------------
+  surat_keterangan: {
+    label: 'Surat Keterangan',
+    icon:  'doc',
+    color: 'cyan',
+    groups: [
+      {
+        title: 'Identitas Surat',
+        fields: [
+          { name: 'nomorSurat', label: 'Nomor Surat', type: 'text',
+            placeholder: '004/SK/VI/2026', required: true },
+        ],
+      },
+      {
+        title: 'Data Pihak yang Diterangkan',
+        fields: [
+          { name: 'namaPihak',   label: 'Nama Lengkap', type: 'text', required: true },
+          { name: 'identitas',   label: 'NISN / NIP / NIK', type: 'text',
+            optional: true, placeholder: 'Isi sesuai kebutuhan' },
+          { name: 'ttl',         label: 'Tempat, Tanggal Lahir', type: 'text',
+            placeholder: 'Pringgabaya, 01 Januari 2015', optional: true },
+          { name: 'alamat',      label: 'Alamat', type: 'textarea', rows: 2,
+            placeholder: 'Jl. Raya Pringgabaya, Lombok Timur', optional: true },
+        ],
+      },
+      {
+        title: 'Isi Keterangan',
+        fields: [
+          { name: 'isiKeterangan', label: 'Isi Keterangan', type: 'textarea', rows: 4,
+            placeholder: 'Yang bersangkutan adalah benar siswa aktif di SD Negeri 3 Pringgabaya...',
+            required: true },
+          { name: 'keperluan',     label: 'Keperluan / Tujuan Surat', type: 'text',
+            placeholder: 'Melengkapi persyaratan beasiswa', required: true },
+          { name: 'penandaTangan', label: 'Penanda Tangan', type: 'select',
+            options: PENANDA_TANGAN_OPTIONS, required: true },
+        ],
+      },
+    ],
+  },
+
+  // ----------------------------------------------------------
+  // 5. SK PANITIA
+  // ----------------------------------------------------------
+  sk_panitia: {
+    label: 'SK Panitia',
+    icon:  'badge',
+    color: 'ungu',
+    groups: [
+      {
+        title: 'Identitas SK',
+        fields: [
+          { name: 'nomorSK',    label: 'Nomor SK', type: 'text',
+            placeholder: '005/SK-P/VI/2026', required: true },
+          { name: 'tentang',    label: 'Tentang', type: 'text',
+            placeholder: 'Pembentukan Panitia Ujian Akhir Semester Genap', required: true },
+          { name: 'namaKegiatan', label: 'Nama Kegiatan', type: 'text',
+            placeholder: 'Ujian Akhir Semester Genap TA 2025/2026', required: true },
+          { name: 'tahunPelajaran', label: 'Tahun Pelajaran', type: 'text',
+            placeholder: '2025/2026', required: true },
+        ],
+      },
+      {
+        title: 'Dasar Pertimbangan',
+        fields: [
+          { name: 'dasarPertimbangan', label: 'Dasar Pertimbangan / Konsideran', type: 'textarea', rows: 4,
+            placeholder: '1. Undang-Undang Nomor 20 Tahun 2003 tentang Sistem Pendidikan Nasional\n2. ...',
+            optional: true },
+        ],
+      },
+      {
+        title: 'Susunan Panitia',
+        fields: [
+          { name: 'daftarPanitia', label: 'Daftar Panitia', type: 'textarea', rows: 6,
+            placeholder: 'Ketua       : Nama Lengkap, S.Pd.\nSekretaris  : Nama Lengkap\nBendahara   : Nama Lengkap\nAnggota     :\n1. Nama Lengkap\n2. Nama Lengkap',
+            required: true },
+          { name: 'tugasPanitia', label: 'Tugas Panitia', type: 'textarea', rows: 4,
+            placeholder: '1. Menyusun dan melaksanakan rencana kegiatan\n2. Membuat laporan pelaksanaan kegiatan\n3. Bertanggung jawab kepada Kepala Sekolah',
+            optional: true },
+        ],
+      },
+      {
+        title: 'Pengesahan',
+        fields: [
+          { name: 'tanggalDitetapkan', label: 'Tanggal Ditetapkan', type: 'date', required: true },
+          { name: 'penandaTangan',     label: 'Penanda Tangan', type: 'select',
+            options: PENANDA_TANGAN_OPTIONS, required: true },
+        ],
+      },
+    ],
+  },
+
+  // ----------------------------------------------------------
+  // 6. BERITA ACARA
+  // ----------------------------------------------------------
+  berita_acara: {
+    label: 'Berita Acara',
+    icon:  'clipboard',
+    color: 'merah',
+    groups: [
+      {
+        title: 'Identitas Berita Acara',
+        fields: [
+          { name: 'nomorBA',      label: 'Nomor Berita Acara', type: 'text',
+            placeholder: '006/BA/VI/2026', required: true },
+          { name: 'namaKegiatan', label: 'Nama Kegiatan', type: 'text',
+            placeholder: 'Serah Terima Jabatan Kepala Perpustakaan', required: true },
+        ],
+      },
+      {
+        title: 'Waktu & Tempat',
+        fields: [
+          { name: 'hari',    label: 'Hari',    type: 'text',
+            placeholder: 'Senin', required: true },
+          { name: 'tanggal', label: 'Tanggal', type: 'date', required: true },
+          { name: 'waktu',   label: 'Waktu',   type: 'text',
+            placeholder: '10.00 WITA s.d. selesai', required: true },
+          { name: 'tempat',  label: 'Tempat',  type: 'text',
+            placeholder: 'Ruang Perpustakaan SD Negeri 3 Pringgabaya', required: true },
+        ],
+      },
+      {
+        title: 'Para Pihak',
+        fields: [
+          { name: 'pihakPertama', label: 'Pihak Pertama (Penyerah)', type: 'text',
+            placeholder: 'Nama — Jabatan', required: true },
+          { name: 'pihakKedua',   label: 'Pihak Kedua (Penerima)', type: 'text',
+            placeholder: 'Nama — Jabatan', required: true },
+        ],
+      },
+      {
+        title: 'Isi Berita Acara',
+        fields: [
+          { name: 'uraianKegiatan', label: 'Uraian Kegiatan', type: 'textarea', rows: 4,
+            placeholder: 'Pada hari ini telah dilaksanakan serah terima...', required: true },
+          { name: 'hasilKegiatan',  label: 'Hasil Kegiatan / Kesimpulan', type: 'textarea', rows: 3,
+            placeholder: 'Kegiatan berjalan lancar dan...', optional: true },
+          { name: 'penandaTangan',  label: 'Penanda Tangan / Pemimpin Acara', type: 'select',
+            options: PENANDA_TANGAN_OPTIONS, required: true },
+        ],
+      },
+    ],
+  },
+
+  // ----------------------------------------------------------
+  // 7. PROPOSAL KEGIATAN
+  // ----------------------------------------------------------
+  proposal_kegiatan: {
+    label: 'Proposal Kegiatan',
+    icon:  'list',
+    color: 'hijau',
+    groups: [
+      {
+        title: 'Identitas Proposal',
+        fields: [
+          { name: 'nomorDokumen',  label: 'Nomor Dokumen', type: 'text',
+            placeholder: '007/PP/VI/2026', optional: true },
+          { name: 'namaKegiatan',  label: 'Nama Kegiatan', type: 'text',
+            placeholder: 'Pentas Seni Akhir Tahun Pelajaran 2025/2026', required: true },
+          { name: 'tanggal',       label: 'Tanggal Rencana Kegiatan', type: 'date', required: true },
+        ],
+      },
+      {
+        title: 'Latar Belakang & Tujuan',
+        fields: [
+          { name: 'latarBelakang', label: 'Latar Belakang', type: 'textarea', rows: 5,
+            placeholder: 'Dalam rangka mengembangkan bakat dan potensi siswa...', required: true },
+          { name: 'tujuan',        label: 'Tujuan Kegiatan', type: 'textarea', rows: 3,
+            placeholder: '1. Mengembangkan kreativitas siswa\n2. Mempererat kebersamaan\n3. ...', required: true },
+        ],
+      },
+      {
+        title: 'Pelaksanaan & Anggaran',
+        fields: [
+          { name: 'waktuPelaksanaan', label: 'Waktu Pelaksanaan', type: 'text',
+            placeholder: 'Sabtu, 20 Juni 2026 pukul 08.00 WITA', required: true },
+          { name: 'tempatPelaksanaan', label: 'Tempat Pelaksanaan', type: 'text',
+            placeholder: 'Halaman SD Negeri 3 Pringgabaya', required: true },
+          { name: 'sasaran',          label: 'Sasaran / Peserta', type: 'text',
+            placeholder: 'Seluruh siswa kelas I–VI', optional: true },
+          { name: 'anggaran',         label: 'Perkiraan Anggaran', type: 'text',
+            placeholder: 'Rp 5.000.000 (Lima Juta Rupiah)', optional: true },
+        ],
+      },
+      {
+        title: 'Pengesahan',
+        fields: [
+          { name: 'penandaTangan', label: 'Penanda Tangan', type: 'select',
+            options: PENANDA_TANGAN_OPTIONS, required: true },
+        ],
+      },
+    ],
+  },
+
+  // ----------------------------------------------------------
+  // 8. NOTULEN RAPAT
+  // ----------------------------------------------------------
+  notulen_rapat: {
+    label: 'Notulen Rapat',
+    icon:  'list',
+    color: 'navy',
+    groups: [
+      {
+        title: 'Identitas Rapat',
+        fields: [
+          { name: 'nomorDokumen', label: 'Nomor Notulen', type: 'text',
+            placeholder: '008/NTL/VI/2026', optional: true },
+          { name: 'agenda',       label: 'Agenda Rapat', type: 'text',
+            placeholder: 'Rapat Persiapan Ujian Akhir Semester', required: true },
+          { name: 'tanggalRapat', label: 'Tanggal Rapat', type: 'date', required: true },
+          { name: 'waktu',        label: 'Waktu', type: 'text',
+            placeholder: '09.00 – 11.00 WITA', required: true },
+          { name: 'tempat',       label: 'Tempat', type: 'text',
+            placeholder: 'Ruang Rapat SD Negeri 3 Pringgabaya', required: true },
+        ],
+      },
+      {
+        title: 'Peserta & Pemimpin',
+        fields: [
+          { name: 'pemimpinRapat', label: 'Pemimpin Rapat', type: 'text',
+            placeholder: 'Maturiadi, S.Pd.', required: true },
+          { name: 'peserta',       label: 'Peserta Rapat', type: 'textarea', rows: 4,
+            placeholder: '1. Nama — Jabatan\n2. Nama — Jabatan\n3. ...', required: true },
+        ],
+      },
+      {
+        title: 'Isi Notulen',
+        fields: [
+          { name: 'hasilRapat',     label: 'Hasil / Keputusan Rapat', type: 'textarea', rows: 6,
+            placeholder: '1. Disepakati bahwa...\n2. Diputuskan bahwa...\n3. ...', required: true },
+          { name: 'tindakLanjut',   label: 'Tindak Lanjut', type: 'textarea', rows: 3,
+            placeholder: '1. Bagian kurikulum menyiapkan jadwal paling lambat...\n2. ...', optional: true },
+          { name: 'notulis',        label: 'Notulis', type: 'text', required: true },
+          { name: 'penandaTangan',  label: 'Penanda Tangan', type: 'select',
+            options: PENANDA_TANGAN_OPTIONS, required: true },
+        ],
+      },
+    ],
+  },
+}
+
 // === Kunci sessionStorage ===
 export const SESSION_KEY = 'sdentibaya_token'
 
