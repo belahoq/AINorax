@@ -126,4 +126,19 @@
   - Simulasi delay 1.8 detik dengan spinner saat "Membuat Dokumen..."
   - `console.log` payload aktif di mode DEV untuk debugging
 
+### [TAHAP-05] Bangun Halaman Arsip Dokumen
+- **Tanggal:** 2026-06-07
+- **Status:** ✅ Selesai
+- **Deskripsi:** Membangun halaman Arsip Dokumen lengkap dengan tabel desktop + card list mobile, filter berlapis (search, jenis, status), pill ringkasan status, semua tombol aksi (Docs/PDF/Salin/Hapus), dan modal konfirmasi hapus. Semua data dari dummy.
+- **File dibuat/diubah:**
+  - `frontend/src/lib/constants.js` — tambah `DUMMY_ARSIP_DOKUMEN` (15 entri, semua 8 jenis, 3 status: berhasil/draft/gagal) dan `STATUS_DOKUMEN` array
+  - `frontend/src/components/DataTable.jsx` — tambah kolom `sortable` (klik header untuk sort asc/desc) + `hideOnMobile` (kolom disembunyikan di layar kecil) + `SortIcon`, prop `onRowClick`
+  - `frontend/src/pages/Archive.jsx` — rebuild lengkap: `StatusBadge` per status, `AksiButtons` (Docs/PDF/Salin/Hapus), `DocCard` untuk mobile, `ModalHapus` konfirmasi, toolbar search+filter jenis+filter status, pill ringkasan per-status, tabel desktop (`hidden sm:block`) + card list mobile (`sm:hidden`), reset filter, info jumlah hasil, EmptyState kondisional
+- **Catatan:**
+  - Tabel desktop: kolom ID/Tanggal/Nomor Surat/Dibuat Oleh disembunyikan di mobile (`hideOnMobile`)
+  - Card list mobile: tampil di bawah breakpoint `sm` — tiap kartu memiliki semua aksi lengkap
+  - Tombol Docs/PDF disabled (styling abu) jika status bukan `berhasil` atau URL kosong
+  - Salin link menggunakan `navigator.clipboard.writeText` dengan fallback
+  - Hapus hanya menghapus dari state lokal — akan diganti ke API saat backend aktif
+
 <!-- Entri berikutnya akan ditambahkan di bawah ini -->
