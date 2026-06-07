@@ -265,6 +265,43 @@
 
 ---
 
+### [BUGFIX] Login gagal — PIN salah selalu muncul meski PIN benar
+- **Tanggal:** 2026-06-07
+- **Status:** ✅ Diperbaiki
+- **File:** `frontend/src/lib/api.js`
+- **Gejala:** Login di production (`pages.dev`) selalu menampilkan "PIN salah" meskipun PIN yang diketik benar dan sudah diset di Cloudflare Worker.
+- **Penyebab:**
+  Di fungsi `_fetchWorker()`, ada interceptor untuk HTTP 401:
+  ```js
+  if (res.status === 401) {
+    logout()
+    window.location.href = '/login'  // redirect
+    return                           // return undefined
+  }
+  ```
+  Interceptor ini dirancang untuk menangani **token expired** pada endpoint protected. Namun, ia juga menangkap response 401 dari **`/api/login`** — yang artinya "PIN salah".
+  Akibatnya: ketika Worker mengembalikan 401 (PIN salah), `_fetchWorker` melakukan `logout()` + `window.location.href = '/login'` + `return undefined`. Fungsi `login()` menerima `undefined`, lalu `Login.jsx` mencoba `saveSession(undefined, undefined)` — tidak ada error yang dilempar ke `catch`, tapi sesi juga tidak tersimpan → tampilan berputar atau PIN seperti salah.
+- **Solusi:**
+  Pisahkan penanganan 401 berdasarkan endpoint yang dipanggil:
+  - Jika `endpoint === '/api/login'` → 401 berarti PIN salah → **lempar Error** dengan pesan dari Worker
+  - Jika endpoint lain → 401 berarti token expired → tetap logout + redirect
+  ```js
+  if (res.status === 401) {
+    let data
+    try { data = await res.json() } catch { data = null }
+
+    if (endpoint === '/api/login') {
+      throw new Error(data?.message || 'PIN salah. Silakan coba lagi.')
+    }
+    logout()
+    window.location.href = '/login'
+    return
+  }
+  ```
+- **Catatan:** Bug ini **hanya muncul di production** (karena `BACKEND_CONFIGURED = true`). Di mode demo (`VITE_API_URL` tidak diset), fungsi `login()` punya path berbeda yang tidak melewati `_fetchWorker` untuk 401.
+
+---
+
 ### [REVIEW] Pre-Deploy Review — Audit Menyeluruh Sebelum Deploy
 - **Tanggal:** 2026-06-07
 - **Status:** ✅ Selesai

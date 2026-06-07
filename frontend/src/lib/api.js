@@ -63,14 +63,25 @@ async function _fetchWorker(endpoint, options = {}) {
 
     clearTimeout(timer)
 
-    // Jika 401 → sesi kadaluarsa, paksa logout
+    // Jika 401 → dua kemungkinan:
+    // a) PIN salah saat POST /api/login → lempar error biasa, JANGAN redirect
+    // b) Token expired saat akses endpoint protected → logout + redirect
     if (res.status === 401) {
+      let data
+      try { data = await res.json() } catch { data = null }
+
+      // Endpoint login: 401 = PIN salah, kembalikan sebagai error biasa
+      if (endpoint === '/api/login') {
+        throw new Error(data?.message || 'PIN salah. Silakan coba lagi.')
+      }
+
+      // Endpoint lain: 401 = token expired → paksa logout + redirect
       logout()
       window.location.href = '/login'
       return
     }
 
-    // Parse JSON
+    // Parse JSON untuk response selain 401
     let data
     try {
       data = await res.json()
