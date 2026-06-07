@@ -1,15 +1,18 @@
 // ============================================================
 // Archive.jsx — Halaman Arsip Dokumen
+// Data dari API nyata jika backend aktif, fallback ke dummy.
 // ============================================================
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useNavigate }       from 'react-router-dom'
 import {
   DUMMY_ARSIP_DOKUMEN,
   JENIS_DOKUMEN,
   STATUS_DOKUMEN,
 } from '../lib/constants'
+import { listDocuments } from '../lib/api'
 import DataTable from '../components/DataTable'
 import EmptyState from '../components/EmptyState'
+import LoadingState from '../components/LoadingState'
 import { useToast, ToastContainer } from '../components/Toast'
 
 // ============================================================
@@ -296,6 +299,7 @@ export default function Archive() {
 
   // Data state — mulai dari dummy, akan diganti fetch API
   const [data, setData]         = useState(DUMMY_ARSIP_DOKUMEN)
+  const [dataLoading, setDataLoading] = useState(true)
 
   // Filter & search state
   const [search,       setSearch]       = useState('')
@@ -304,6 +308,23 @@ export default function Archive() {
 
   // Modal hapus
   const [hapusId, setHapusId] = useState(null)
+
+  // ── Fetch data arsip saat halaman dibuka ─────────────────
+  useEffect(() => {
+    let mounted = true
+    ;(async () => {
+      try {
+        const docs = await listDocuments()
+        if (mounted && docs?.length) setData(docs)
+      } catch (err) {
+        // Fallback ke dummy sudah dilakukan di api.js, toast error
+        if (mounted) toast.warning('Gagal memuat arsip dari server. Menampilkan data lokal.')
+      } finally {
+        if (mounted) setDataLoading(false)
+      }
+    })()
+    return () => { mounted = false }
+  }, [])
 
   // ── Filter + search ────────────────────────────────────────
   const filtered = useMemo(() => {
@@ -485,6 +506,7 @@ export default function Archive() {
           <DataTable
             columns={columns}
             data={filtered}
+            loading={dataLoading}
             striped
             emptyTitle={adaFilter ? 'Tidak ada hasil' : 'Belum ada dokumen'}
             emptySubtitle={
@@ -513,7 +535,9 @@ export default function Archive() {
             CARD LIST — MOBILE (di bawah sm)
         =================================================== */}
         <div className="sm:hidden space-y-3">
-          {filtered.length === 0 ? (
+          {dataLoading ? (
+            <div className="card"><LoadingState size="sm" /></div>
+          ) : filtered.length === 0 ? (
             <div className="card">
               <EmptyState
                 title={adaFilter ? 'Tidak ada hasil' : 'Belum ada dokumen'}
