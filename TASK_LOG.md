@@ -191,4 +191,23 @@
   - `logAction` silent fail — tidak melempar error agar tidak mengganggu flow utama
   - Script Properties: `GAS_SECRET`, `SPREADSHEET_ID`, `DRIVE_FOLDER_ID`, `DEFAULT_TEMPLATE_DOC_ID` (opsional)
 
+### [TAHAP-09] Integrasi Frontend dengan Cloudflare Worker
+- **Tanggal:** 2026-06-07
+- **Status:** ✅ Selesai
+- **Deskripsi:** Mengintegrasikan semua halaman frontend dengan Cloudflare Worker API. Menerapkan strategi graceful degradation — jika `VITE_API_URL` tidak diset atau Worker tidak bisa dihubungi, aplikasi otomatis fallback ke dummy data dan tetap bisa dipakai sepenuhnya.
+- **File dibuat/diubah:**
+  - `frontend/src/lib/auth.js` — rebuild: `saveSession(token, user)`, `getSession()`, `getToken()`, `isAuthenticated()`, `logout()` — simpan ke localStorage (persist setelah refresh), alias `saveToken/removeToken/isLoggedIn` untuk kompatibilitas
+  - `frontend/src/lib/api.js` — rebuild lengkap: fetch timeout 12s, pesan error ramah Bahasa Indonesia, strategi fallback per fungsi; `apiHealth()`, `login(pin)`, `gasRequest(action, payload)`, `getDashboardStats()` + normalise GAS response, `createDocument(payload)`, `listDocuments(filter)`, `getSettings()`, `saveSettings(payload)`, `pingWorker()` / alias `pingKoneksi()`
+  - `frontend/src/pages/Login.jsx` — gunakan `saveSession(token, user)`, redirect jika sudah login, error message styled, badge "Mode Demo" jika backend belum diset
+  - `frontend/src/pages/Dashboard.jsx` — `useEffect` fetch `getDashboardStats()`, loading state, badge "Data Live / Mode Demo", fallback transparan ke DUMMY_STATS
+  - `frontend/src/pages/Archive.jsx` — `useEffect` fetch `listDocuments()`, loading state di tabel dan card list, toast warning jika fallback
+  - `frontend/src/pages/CreateDocument.jsx` — panggil `createDocument(payload)` nyata (Worker → GAS), handle error dengan pesan ramah
+  - `frontend/src/pages/Settings.jsx` — gunakan `pingWorker()`, tampilkan detail teknis, handle semua status, banner mode demo
+  - `frontend/.env.example` *(baru)* — template variabel environment dengan instruksi
+- **Catatan:**
+  - `BACKEND_CONFIGURED = !!import.meta.env.VITE_API_URL` — deteksi otomatis mode
+  - Fallback dilakukan di `api.js`, bukan di komponen — komponen tidak tahu apakah data dari API atau dummy
+  - Token disimpan di `localStorage` agar tetap login setelah refresh halaman
+  - `pingWorker` melakukan 2 langkah: `GET /api/health` → `POST /api/gas {action:ping}`
+
 <!-- Entri berikutnya akan ditambahkan di bawah ini -->

@@ -4,6 +4,7 @@
 import { useState, useMemo } from 'react'
 import { useNavigate }       from 'react-router-dom'
 import { JENIS_DOKUMEN, DOC_FIELDS, SEKOLAH, PENANDA_TANGAN_OPTIONS } from '../lib/constants'
+import { createDocument } from '../lib/api'
 import FormField             from '../components/FormField'
 import { useToast, ToastContainer } from '../components/Toast'
 
@@ -416,36 +417,38 @@ export default function CreateDocument() {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  // Generate dokumen (simulasi)
+  // Generate dokumen — panggil API nyata (atau simulasi jika dummy)
   async function handleGenerate() {
     setLoading(true)
     try {
-      // Simulasi delay generate
-      await new Promise(r => setTimeout(r, 1800))
-
-      // Payload siap kirim ke API nanti
+      // Payload lengkap: data form + data sekolah
       const payload = {
         jenis,
-        namaSekolah:  SEKOLAH.nama,
-        npsn:         SEKOLAH.npsn,
-        namaKepsek:   SEKOLAH.namaKepsek,
-        nipKepsek:    SEKOLAH.nipKepsek,
-        tahunAjaran:  SEKOLAH.tahunAjaran,
+        namaSekolah:         SEKOLAH.nama,
+        npsn:                SEKOLAH.npsn,
+        namaKepsek:          SEKOLAH.namaKepsek,
+        nipKepsek:           SEKOLAH.nipKepsek,
+        tahunAjaran:         SEKOLAH.tahunAjaran,
+        dibuatOleh:          'admin',
+        penandaTanganLabel:  labelPenanda(form.penandaTangan),
         ...form,
-        // Resolve label penanda tangan
-        penandaTanganLabel: labelPenanda(form.penandaTangan),
       }
-      console.log('[CreateDocument] Payload siap kirim:', payload)
 
-      // Simulasi response
+      // Panggil API (Worker → GAS), atau simulasi jika backend belum aktif
+      const res = await createDocument(payload)
+
       setHasil({
-        docsUrl: 'https://docs.google.com/document/d/SIMULASI_ID/edit',
-        pdfUrl:  'https://drive.google.com/file/d/SIMULASI_PDF_ID/view',
+        docsUrl: res.docUrl  || res.docsUrl || '#',
+        pdfUrl:  res.pdfUrl  || '#',
+        id:      res.id      || '',
       })
-      toast.success('Dokumen berhasil dibuat! (Simulasi)')
+      toast.success(res.message || 'Dokumen berhasil dibuat!')
       setStep(3)
+
     } catch (err) {
-      toast.error(err.message || 'Gagal membuat dokumen.')
+      // Pesan ramah untuk operator sekolah
+      const msg = err.message || 'Gagal membuat dokumen. Coba lagi atau hubungi administrator.'
+      toast.error(msg)
     } finally {
       setLoading(false)
       window.scrollTo({ top: 0, behavior: 'smooth' })
