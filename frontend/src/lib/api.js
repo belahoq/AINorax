@@ -614,6 +614,23 @@ export async function addUser(payload) {
 }
 
 // ============================================================
+// deleteUser — hapus pengguna (admin only)
+// ============================================================
+export async function deleteUser(id) {
+  if (!BACKEND_CONFIGURED) {
+    await _delay(600)
+    return { message: 'Pengguna berhasil dihapus (mode demo).' }
+  }
+
+  const res = await _fetchWorker(`/api/users/${id}`, {
+    method: 'DELETE',
+  })
+
+  if (!res?.success) throw new Error(res?.message || 'Gagal menghapus pengguna.')
+  return { message: res.message || 'Pengguna berhasil dihapus.' }
+}
+
+// ============================================================
 // listUsers — ambil daftar semua pengguna (admin only)
 // ============================================================
 export async function listUsers() {
@@ -630,13 +647,13 @@ export async function listUsers() {
       {
         id: 'USR-002', nama: 'Budi Santoso, S.Pd.',
         email: 'budi@sdn3pringgabaya.sch.id', nip: '19850101200901001',
-        jabatan: 'Guru Kelas V', role: 'operator', foto: '',
+        jabatan: 'Guru Kelas V', role: 'guru', foto: '',
         isActive: true, createdAt: '2026-06-02',
       },
       {
         id: 'USR-003', nama: 'Ani Rahayu',
         email: 'ani@sdn3pringgabaya.sch.id', nip: '',
-        jabatan: 'Staf TU', role: 'operator', foto: '',
+        jabatan: 'Staf TU', role: 'staf', foto: '',
         isActive: true, createdAt: '2026-06-03',
       },
     ]

@@ -66,6 +66,12 @@ export default {
         return withCors(await handleListUsers(request, env), request, env)
       }
 
+      // Hapus user — DELETE /api/users/:id (admin only)
+      if (pathname.startsWith('/api/users/') && pathname !== '/api/users/profile' && request.method === 'DELETE') {
+        const userId = pathname.replace('/api/users/', '')
+        return withCors(await handleDeleteUser(request, env, userId), request, env)
+      }
+
       // Update profil user sendiri
       if (pathname === '/api/users/profile' && request.method === 'POST') {
         return withCors(await handleUpdateProfile(request, env), request, env)
@@ -183,6 +189,52 @@ async function handleListUsers(request, env) {
 
   if (gasData && typeof gasData === 'object') delete gasData.secret
   return jsonResponse(200, true, 'Daftar pengguna berhasil diambil.', gasData?.data || [])
+}
+
+// ============================================================
+// HANDLER: DELETE /api/users/:id — hapus pengguna (admin only)
+// ============================================================
+
+async function handleDeleteUser(request, env, userId) {
+  // Pastikan admin
+  const authErr = await requireAdmin(request, env)
+  if (authErr) return authErr
+
+  if (!userId || userId.trim() === '') {
+    return jsonResponse(400, false, 'ID pengguna tidak valid.')
+  }
+
+  if (!env.GAS_URL || !env.GAS_SECRET) {
+    return jsonResponse(503, false, 'Backend belum dikonfigurasi.')
+  }
+
+  let gasRes
+  try {
+    gasRes = await fetch(env.GAS_URL, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        secret:  env.GAS_SECRET,
+        action:  'deleteUser',
+        payload: { id: userId },
+      }),
+    })
+  } catch {
+    return jsonResponse(502, false, 'Tidak dapat menghubungi server backend.')
+  }
+
+  let gasData
+  try { gasData = await gasRes.json() } catch {
+    return jsonResponse(502, false, 'Respons server tidak dapat dibaca.')
+  }
+
+  if (gasData && typeof gasData === 'object') delete gasData.secret
+  return jsonResponse(
+    gasRes.ok ? 200 : 400,
+    !!gasData?.success,
+    gasData?.message || (gasRes.ok ? 'Pengguna berhasil dihapus.' : 'Gagal menghapus pengguna.'),
+    null
+  )
 }
 
 async function handleUpdateProfile(request, env) {
@@ -434,6 +486,7 @@ async function handleGas(request, env) {
     'loginUser',
     'addUser',
     'listUsers',
+    'deleteUser',
     'updateUserProfile',
   ]
 
