@@ -673,13 +673,51 @@ export async function updateProfile(payload) {
     return { message: 'Profil berhasil diperbarui (mode demo).', data: payload }
   }
 
-  const res = await _fetchWorker('/api/users/profile', {
-    method: 'POST',
-    body:   JSON.stringify(payload),
-  })
+  // Foto base64 bisa besar — gunakan timeout lebih panjang (30 detik)
+  const adaFotoBase64 = payload.foto && payload.foto.startsWith('data:')
+  const timeout       = adaFotoBase64 ? 30_000 : FETCH_TIMEOUT_MS
 
-  if (!res?.success) throw new Error(res?.message || 'Gagal memperbarui profil.')
-  return { message: res.message || 'Profil berhasil diperbarui.', data: res.data }
+  const controller = new AbortController()
+  const timer      = setTimeout(() => controller.abort(), timeout)
+  const token      = getToken()
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/users/profile`, {
+      method:  'POST',
+      headers: {
+        'Content-Type':  'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body:    JSON.stringify(payload),
+      signal:  controller.signal,
+    })
+
+    clearTimeout(timer)
+
+    if (res.status === 401) {
+      logout()
+      window.location.href = '/login'
+      return
+    }
+
+    let data
+    try { data = await res.json() } catch {
+      throw new Error('Server mengembalikan respons yang tidak dapat dibaca.')
+    }
+
+    if (!res.ok || !data?.success) {
+      throw new Error(data?.message || `Server merespons dengan kode ${res.status}.`)
+    }
+
+    return { message: data.message || 'Profil berhasil diperbarui.', data: data.data }
+
+  } catch (err) {
+    clearTimeout(timer)
+    if (err.name === 'AbortError') {
+      throw new Error('Unggah foto terlalu lama. Coba gunakan foto berukuran lebih kecil (maks. 500 KB).')
+    }
+    throw err
+  }
 }
 
 // ============================================================

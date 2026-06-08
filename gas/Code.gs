@@ -1179,8 +1179,11 @@ function deleteUser(payload) {
 
 /**
  * updateUserProfile — update data profil / password pengguna.
+ * Foto profil diterima dalam format base64, disimpan ke Google Drive,
+ * dan yang tersimpan di sheet hanya URL publiknya.
+ *
  * Identifikasi via id (jika ada) atau email.
- * @param {Object} payload - { id?, email?, nama, nip, jabatan, foto,
+ * @param {Object} payload - { id?, email?, nama, nip, jabatan, foto(base64/URL),
  *                             telepon, alamat, bio, passwordHash? (baru) }
  */
 function updateUserProfile(payload) {
@@ -1193,27 +1196,41 @@ function updateUserProfile(payload) {
     var data  = sheet.getDataRange().getValues();
     var now   = new Date().toISOString();
 
+    // Proses foto: jika base64 → upload ke Drive → simpan URL publik
+    var fotoUrl = payload.foto || null;
+    if (fotoUrl && fotoUrl.indexOf('data:') === 0) {
+      try {
+        fotoUrl = uploadFotoProfil(fotoUrl, payload.id || payload.email);
+      } catch (uploadErr) {
+        Logger.log('[updateUserProfile] Upload foto gagal: ' + uploadErr);
+        // Jangan gagalkan seluruh simpan hanya karena foto
+        fotoUrl = null;
+      }
+    }
+
     for (var i = 1; i < data.length; i++) {
       var cocok = (payload.id && String(data[i][0]) === String(payload.id)) ||
                   (payload.email && String(data[i][2]).toLowerCase().trim() === String(payload.email).toLowerCase().trim());
       if (cocok) {
         var rowNum = i + 1;
-        // Update hanya field yang dikirim (tidak menimpa dengan kosong)
         if (payload.nama    !== undefined) sheet.getRange(rowNum, 2).setValue(payload.nama);
         if (payload.nip     !== undefined) sheet.getRange(rowNum, 4).setValue(payload.nip);
         if (payload.jabatan !== undefined) sheet.getRange(rowNum, 5).setValue(payload.jabatan);
-        if (payload.foto    !== undefined) sheet.getRange(rowNum, 8).setValue(payload.foto);
+        if (fotoUrl         !== null)      sheet.getRange(rowNum, 8).setValue(fotoUrl);
         if (payload.telepon !== undefined) sheet.getRange(rowNum, 9).setValue(payload.telepon);
         if (payload.alamat  !== undefined) sheet.getRange(rowNum, 10).setValue(payload.alamat);
         if (payload.bio     !== undefined) sheet.getRange(rowNum, 11).setValue(payload.bio);
 
-        // Ganti password jika passwordHash baru dikirim
         if (payload.passwordHash) {
           sheet.getRange(rowNum, 7).setValue(payload.passwordHash);
         }
 
-        sheet.getRange(rowNum, 14).setValue(now); // updatedAt
-        return jsonResponse({ success: true, message: 'Profil berhasil diperbarui.' });
+        sheet.getRange(rowNum, 14).setValue(now);
+        return jsonResponse({
+          success: true,
+          message: 'Profil berhasil diperbarui.',
+          data: { foto: fotoUrl !== null ? fotoUrl : (payload.foto || null) }
+        });
       }
     }
 
@@ -1221,6 +1238,45 @@ function updateUserProfile(payload) {
   } catch (err) {
     return jsonResponse({ success: false, message: 'Gagal memperbarui profil: ' + err });
   }
+}
+
+
+/**
+ * uploadFotoProfil — upload foto base64 ke Google Drive.
+ * Folder: PROFILE_PHOTO_FOLDER_ID di Script Properties,
+ * atau fallback ke ID hardcoded (1A1C56gtNW9AqDGDcI4VinIeJSXl1OZYx).
+ *
+ * @param {string} dataUri - "data:image/jpeg;base64,/9j/..."
+ * @param {string} userId  - ID atau email user (untuk nama file)
+ * @returns {string} URL publik: "https://drive.google.com/uc?export=view&id=..."
+ */
+function uploadFotoProfil(dataUri, userId) {
+  var props    = PropertiesService.getScriptProperties();
+  var folderId = props.getProperty('PROFILE_PHOTO_FOLDER_ID') || '1A1C56gtNW9AqDGDcI4VinIeJSXl1OZYx';
+
+  // Parse: "data:<mimeType>;base64,<data>"
+  var matches = dataUri.match(/^data:([^;]+);base64,(.+)$/);
+  if (!matches) throw new Error('Format base64 tidak valid.');
+
+  var mimeType   = matches[1]; // "image/jpeg"
+  var base64Data = matches[2];
+
+  var ext = 'jpg';
+  if (mimeType === 'image/png')  ext = 'png';
+  if (mimeType === 'image/webp') ext = 'webp';
+  if (mimeType === 'image/gif')  ext = 'gif';
+
+  var namaFile = 'foto-' +
+    String(userId).replace(/[^a-zA-Z0-9_-]/g, '_') +
+    '-' + new Date().getTime() + '.' + ext;
+
+  var blob   = Utilities.newBlob(Utilities.base64Decode(base64Data), mimeType, namaFile);
+  var folder = DriveApp.getFolderById(folderId);
+  var file   = folder.createFile(blob);
+
+  file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+
+  return 'https://drive.google.com/uc?export=view&id=' + file.getId();
 }
 
 

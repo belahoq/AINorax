@@ -23,8 +23,8 @@ const APP_VERSION = '1.0.0'
 /** Nama layanan */
 const SERVICE_NAME = 'SDENTIBAYA AdminKit Worker'
 
-/** Ukuran maksimum body request (bytes) — 512 KB */
-const MAX_BODY_SIZE = 512 * 1024
+/** Ukuran maksimum body request (bytes) — 5 MB untuk support upload foto profil base64 */
+const MAX_BODY_SIZE = 5 * 1024 * 1024
 
 /** Durasi token session (ms) — 8 jam */
 const TOKEN_TTL_MS = 8 * 60 * 60 * 1000

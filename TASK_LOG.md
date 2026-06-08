@@ -265,6 +265,29 @@
 
 ---
 
+### [BUGFIX] Simpan foto profil gagal — "Respons server tidak dapat dibaca"
+- **Tanggal:** 2026-06-08
+- **Status:** ✅ Diperbaiki
+- **File:** `gas/Code.gs`, `worker/index.js`, `frontend/src/lib/api.js`, `frontend/src/pages/UserProfile.jsx`
+- **Penyebab:**
+  Saat mode "Upload File", foto dikonversi ke base64 (`data:image/jpeg;base64,...`) dan disertakan dalam payload JSON ke Worker. String base64 bisa berukuran ratusan KB, menyebabkan dua masalah bersamaan:
+  1. Worker punya batas `MAX_BODY_SIZE = 512 KB` — payload dengan foto base64 langsung ditolak 400 tanpa sampai ke GAS.
+  2. Jika lolos, GAS menerima string base64 besar di dalam JSON → response GAS bisa gagal atau timeout → Worker `res.json()` gagal parse (response bukan JSON valid) → error "Respons server tidak dapat dibaca".
+- **Solusi:**
+  1. `gas/Code.gs` — `updateUserProfile` sekarang mendeteksi jika `foto` adalah data URI base64. Jika ya, dipanggil fungsi baru `uploadFotoProfil()` yang:
+     - Parse MIME type dan decode base64 → Blob
+     - Upload ke folder Drive `1A1C56gtNW9AqDGDcI4VinIeJSXl1OZYx` (atau `PROFILE_PHOTO_FOLDER_ID` dari Script Properties)
+     - Set sharing publik (anyone with link, view only)
+     - Kembalikan URL publik `https://drive.google.com/uc?export=view&id=FILE_ID`
+     - Yang disimpan di sheet hanya URL, bukan base64
+  2. `worker/index.js` — naikkan `MAX_BODY_SIZE` dari 512 KB → 5 MB untuk support base64 foto saat transit ke GAS
+  3. `api.js` — `updateProfile()` sekarang menggunakan timeout 30 detik (bukan 12s) jika payload mengandung foto base64; menggunakan `fetch` langsung (bukan `_fetchWorker`) agar timeout bisa dikonfigurasi per-call
+  4. `UserProfile.jsx` — `handleSimpanProfil` sekarang membaca `result.data.foto` dari response GAS (URL Drive), memperbarui `fotoPreview` dan `formProfil.foto` ke URL Drive (bukan base64), sehingga localStorage tidak menyimpan string base64 besar
+- **Script Property baru (opsional):**
+  Di GAS Script Properties, bisa ditambahkan `PROFILE_PHOTO_FOLDER_ID` = ID folder Drive foto profil. Jika tidak diset, fallback ke `1A1C56gtNW9AqDGDcI4VinIeJSXl1OZYx`.
+
+---
+
 ### [REVIEW] Pre-Deploy Review #2 — Audit Fitur User Management
 - **Tanggal:** 2026-06-08
 - **Status:** ✅ Selesai
