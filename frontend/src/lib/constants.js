@@ -29,40 +29,80 @@ export const BRAND = {
 }
 
 // ============================================================
-// === Menu Navigasi Sidebar — dikelompokkan per seksi ===
+// === Role pengguna
 // ============================================================
-export const MENU_GROUPS = [
+export const USER_ROLES = {
+  ADMIN:    'admin',
+  OPERATOR: 'operator',   // user biasa — akses terbatas
+}
+
+// Kunci localStorage untuk data profil user yang sedang login
+export const USER_PROFILE_KEY = 'sdentibaya_profile'
+
+// ============================================================
+// === Menu Navigasi Sidebar — ADMIN (semua menu)
+// ============================================================
+export const MENU_GROUPS_ADMIN = [
   {
-    // Seksi utama — fitur inti dokumen
-    label: null, // tanpa judul grup
+    label: null,
     items: [
-      { label: 'Dashboard',     path: '/dashboard',    icon: 'grid'    },
+      { label: 'Dashboard',     path: '/dashboard',    icon: 'grid'      },
       { label: 'Buat Dokumen',  path: '/buat-dokumen', icon: 'file-plus' },
-      { label: 'Arsip Dokumen', path: '/arsip',        icon: 'archive' },
+      { label: 'Arsip Dokumen', path: '/arsip',        icon: 'archive'   },
       { label: 'Template',      path: '/template',     icon: 'layout-template' },
     ],
   },
   {
-    // Seksi data & administrasi
     label: 'Administrasi',
     items: [
       { label: 'Master Data', path: '/master-data', icon: 'database' },
-      { label: 'SPMB',        path: '/spmb',        icon: 'users',    badge: 'Coming Soon' },
-      { label: 'Absensi QR',  path: '/absensi-qr',  icon: 'qr-code',  badge: 'Coming Soon' },
-      { label: 'Inventaris',  path: '/inventaris',  icon: 'box',      badge: 'Coming Soon' },
+      { label: 'SPMB',        path: '/spmb',        icon: 'users',   badge: 'Coming Soon' },
+      { label: 'Absensi QR',  path: '/absensi-qr',  icon: 'qr-code', badge: 'Coming Soon' },
+      { label: 'Inventaris',  path: '/inventaris',  icon: 'box',     badge: 'Coming Soon' },
     ],
   },
   {
-    // Seksi sistem
     label: 'Sistem',
     items: [
-      { label: 'Pengaturan', path: '/pengaturan', icon: 'settings' },
+      { label: 'Tambah Pengguna', path: '/add-user',   icon: 'user-plus' },
+      { label: 'Pengaturan',      path: '/pengaturan', icon: 'settings'  },
     ],
   },
 ]
 
-// Flat list untuk keperluan Topbar (page title lookup)
-export const MENU_ITEMS = MENU_GROUPS.flatMap((g) => g.items)
+// ============================================================
+// === Menu Navigasi Sidebar — OPERATOR (akses terbatas)
+// Master Data, Tambah Pengguna, Pengaturan disembunyikan
+// ============================================================
+export const MENU_GROUPS_USER = [
+  {
+    label: null,
+    items: [
+      { label: 'Dashboard',     path: '/dashboard',    icon: 'grid'      },
+      { label: 'Buat Dokumen',  path: '/buat-dokumen', icon: 'file-plus' },
+      { label: 'Arsip Dokumen', path: '/arsip',        icon: 'archive'   },
+      { label: 'Template',      path: '/template',     icon: 'layout-template' },
+    ],
+  },
+  {
+    label: 'Administrasi',
+    items: [
+      { label: 'SPMB',       path: '/spmb',       icon: 'users',   badge: 'Coming Soon' },
+      { label: 'Absensi QR', path: '/absensi-qr', icon: 'qr-code', badge: 'Coming Soon' },
+      { label: 'Inventaris', path: '/inventaris', icon: 'box',     badge: 'Coming Soon' },
+    ],
+  },
+]
+
+// Alias default — Sidebar memilih berdasarkan role saat ini
+export const MENU_GROUPS = MENU_GROUPS_ADMIN
+
+// Flat list untuk Topbar (page title lookup) — gabungan semua menu
+export const MENU_ITEMS = [
+  ...MENU_GROUPS_ADMIN.flatMap(g => g.items),
+  { label: 'Tambah Pengguna', path: '/add-user',   icon: 'user-plus' },
+  { label: 'Profil Saya',     path: '/profil',     icon: 'user'      },
+]
 
 // === Jenis Dokumen ===
 export const JENIS_DOKUMEN = [

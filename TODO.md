@@ -199,7 +199,6 @@
 
 ## 🔲 BACKLOG (Setelah MVP)
 
-- [ ] Multiple admin users dengan peran berbeda
 - [ ] Nomor surat otomatis (auto-increment dengan format baku)
 - [ ] Notifikasi email setelah dokumen dibuat
 - [ ] Cetak langsung dari browser
@@ -209,6 +208,8 @@
 - [ ] Dark mode
 - [x] **Edit template** — SELESAI (TAHAP-11)
 - [x] **Clone/Duplikat template** — SELESAI (TAHAP-11)
+- [x] **Multi-user Add User** — SELESAI (TAHAP-12)
+- [x] **Halaman Profil User** — SELESAI (TAHAP-12)
 
 ---
 

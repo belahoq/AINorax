@@ -1,28 +1,20 @@
 // ============================================================
 // auth.js — Manajemen sesi autentikasi SDENTIBAYA AdminKit
-// Menyimpan token + data user ke localStorage agar tetap
-// login setelah refresh halaman.
+// Mendukung multi-role: admin (PIN) dan operator (email+password)
 // ============================================================
-import { SESSION_KEY } from './constants'
+import { SESSION_KEY, USER_PROFILE_KEY, USER_ROLES } from './constants'
 
-// Kunci localStorage untuk data user
+// Kunci localStorage untuk raw user object dari server
 const USER_KEY = 'sdentibaya_user'
 
 // ============================================================
 // saveSession — simpan token + data user setelah login
 // ============================================================
-
-/**
- * Simpan session ke localStorage setelah login berhasil.
- * @param {string} token
- * @param {Object} user - { name, role }
- */
 export function saveSession(token, user) {
   try {
     localStorage.setItem(SESSION_KEY, token)
     localStorage.setItem(USER_KEY, JSON.stringify(user || {}))
-  } catch (err) {
-    // Fallback ke sessionStorage jika localStorage tidak tersedia
+  } catch {
     sessionStorage.setItem(SESSION_KEY, token)
     sessionStorage.setItem(USER_KEY, JSON.stringify(user || {}))
   }
@@ -31,23 +23,15 @@ export function saveSession(token, user) {
 // ============================================================
 // getSession — ambil session yang tersimpan
 // ============================================================
-
-/**
- * Ambil session dari localStorage.
- * @returns {{ token: string|null, user: Object|null }}
- */
 export function getSession() {
   try {
-    const token = localStorage.getItem(SESSION_KEY)
-      || sessionStorage.getItem(SESSION_KEY)
-      || null
-
+    const token   = localStorage.getItem(SESSION_KEY)
+                 || sessionStorage.getItem(SESSION_KEY)
+                 || null
     const rawUser = localStorage.getItem(USER_KEY)
-      || sessionStorage.getItem(USER_KEY)
-      || null
-
-    const user = rawUser ? JSON.parse(rawUser) : null
-
+                 || sessionStorage.getItem(USER_KEY)
+                 || null
+    const user    = rawUser ? JSON.parse(rawUser) : null
     return { token, user }
   } catch {
     return { token: null, user: null }
@@ -55,39 +39,79 @@ export function getSession() {
 }
 
 // ============================================================
-// getToken — ambil token saja (untuk Authorization header)
+// getToken — ambil token untuk Authorization header
 // ============================================================
-
-/**
- * Ambil token dari storage.
- * @returns {string|null}
- */
 export function getToken() {
   return getSession().token
 }
 
 // ============================================================
+// getUser — ambil objek user lengkap
+// ============================================================
+export function getUser() {
+  return getSession().user
+}
+
+// ============================================================
+// getRole — ambil role user yang sedang login
+// @returns {'admin'|'operator'|null}
+// ============================================================
+export function getRole() {
+  const user = getUser()
+  return user?.role || null
+}
+
+// ============================================================
+// isAdmin — cek apakah user yang login adalah admin
+// ============================================================
+export function isAdmin() {
+  return getRole() === USER_ROLES.ADMIN
+}
+
+// ============================================================
 // isAuthenticated — cek apakah sudah login
 // ============================================================
-
-/**
- * @returns {boolean}
- */
 export function isAuthenticated() {
   return !!getToken()
 }
 
 // ============================================================
-// logout — hapus session dari storage
+// saveProfile — simpan data profil lengkap (foto, jabatan, dll.)
+// Dipisah dari session agar bisa diupdate tanpa re-login
 // ============================================================
+export function saveProfile(profileData) {
+  try {
+    const existing = getProfile() || {}
+    const merged   = { ...existing, ...profileData, _updatedAt: new Date().toISOString() }
+    localStorage.setItem(USER_PROFILE_KEY, JSON.stringify(merged))
+  } catch {
+    // silent fail
+  }
+}
 
-/**
- * Hapus semua data session.
- */
+// ============================================================
+// getProfile — ambil data profil lengkap
+// ============================================================
+export function getProfile() {
+  try {
+    const raw  = localStorage.getItem(USER_PROFILE_KEY)
+    const user = getUser() // data dasar dari token
+    const stored = raw ? JSON.parse(raw) : {}
+    // Merge: data dari token sebagai base, stored menimpa
+    return { ...user, ...stored }
+  } catch {
+    return getUser()
+  }
+}
+
+// ============================================================
+// logout — hapus semua data session dan profil
+// ============================================================
 export function logout() {
   try {
     localStorage.removeItem(SESSION_KEY)
     localStorage.removeItem(USER_KEY)
+    localStorage.removeItem(USER_PROFILE_KEY)
     sessionStorage.removeItem(SESSION_KEY)
     sessionStorage.removeItem(USER_KEY)
   } catch {
@@ -96,6 +120,6 @@ export function logout() {
 }
 
 // ─── Alias lama agar tidak ada import yang rusak ──────────────
-export const saveToken    = (token) => saveSession(token, null)
-export const removeToken  = logout
-export const isLoggedIn   = isAuthenticated
+export const saveToken   = (token) => saveSession(token, null)
+export const removeToken = logout
+export const isLoggedIn  = isAuthenticated
