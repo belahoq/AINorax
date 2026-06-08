@@ -265,6 +265,34 @@
 
 ---
 
+### [REVISI] Tambah Pengguna — Form disederhanakan, Role diperbarui, Hapus Pengguna
+- **Tanggal:** 2026-06-08
+- **Status:** ✅ Selesai
+- **Deskripsi:** Revisi halaman Tambah Pengguna sesuai arahan: form disederhanakan menjadi email + password saja, role diperbarui dari Operator → Guru/Staf, dan ditambahkan fitur hapus pengguna langsung dari daftar dengan modal konfirmasi.
+- **File diubah:**
+  - `frontend/src/pages/AddUser.jsx`:
+    - `EMPTY_FORM` disederhanakan: hanya `email`, `password`, `role`
+    - `ROLE_OPTIONS` diperbarui: `{ guru, staf, admin }` — tidak ada lagi `operator`
+    - `RoleBadge` diperbarui: badge hijau=Guru, kuning=Staf, navy=Admin
+    - Form render disederhanakan: hanya 2 field (Email + Password) + selector Role
+    - Hapus field Nama, Jabatan, NIP, Konfirmasi Password dari form
+    - Validasi disederhanakan: cek email valid + password ≥ 6 karakter
+    - Tambah state `hapusId` + `deletingId`
+    - Tambah handler `handleHapus(id)` memanggil `deleteUser(id)`
+    - Tombol Hapus (ikon tong sampah merah) di setiap baris daftar user
+    - Modal konfirmasi hapus dengan peringatan permanen
+    - Catatan: "Pengguna dapat mengubah profil lengkap kapan saja melalui halaman Profil"
+  - `frontend/src/lib/api.js`:
+    - Tambah `deleteUser(id)` — `DELETE /api/users/:id`, fallback mode demo
+    - Update dummy `listUsers`: role `operator` → `guru`/`staf`
+  - `worker/index.js`:
+    - Tambah route `DELETE /api/users/:id` → `handleDeleteUser()`
+    - Tambah fungsi `handleDeleteUser(request, env, userId)` — admin only, forward ke GAS action `deleteUser`
+    - Tambah `deleteUser` ke `ALLOWED_ACTIONS`
+- **Catatan penting:** GAS `Code.gs` perlu ditambahkan action `deleteUser` yang menghapus baris dari sheet Users berdasarkan ID. Tambahkan di `routeAction` dan buat fungsi `deleteUser(payload)`.
+
+---
+
 ### [TAHAP-12] Fitur Add User, Role-Based Access, dan Halaman Profil
 - **Tanggal:** 2026-06-08
 - **Status:** ✅ Selesai
