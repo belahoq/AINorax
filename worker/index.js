@@ -115,12 +115,14 @@ async function handleAddUser(request, env) {
   const body = await readBody(request)
   if (!body) return jsonResponse(400, false, 'Request body tidak valid.')
 
-  const { nama, email, nip, jabatan, password, role } = body
-  if (!nama || !email || !password) {
-    return jsonResponse(400, false, 'Nama, email, dan password wajib diisi.')
+  // Form Tambah Pengguna hanya mengirim email + password + role.
+  // Data lain (nama, NIP, jabatan) diisi pengguna sendiri via halaman Profil.
+  const { email, password, role } = body
+  if (!email || !password) {
+    return jsonResponse(400, false, 'Email dan password wajib diisi.')
   }
 
-  // Hash password sederhana dengan HMAC-SHA256 sebelum dikirim ke GAS
+  // Hash password dengan HMAC-SHA256 sebelum dikirim ke GAS
   const passwordHash = await hmacSha256(password, env.GAS_SECRET)
 
   let gasRes
@@ -132,11 +134,11 @@ async function handleAddUser(request, env) {
         secret:  env.GAS_SECRET,
         action:  'addUser',
         payload: {
-          nama,
+          nama:         '',                          // diisi nanti via Profil
           email:        email.toLowerCase().trim(),
-          nip:          nip || '',
-          jabatan:      jabatan || '',
-          role:         role || 'operator',
+          nip:          '',
+          jabatan:      '',
+          role:         role || 'guru',
           passwordHash,
         },
       }),
@@ -256,6 +258,15 @@ async function handleUpdateProfile(request, env) {
   const body = await readBody(request)
   if (!body) return jsonResponse(400, false, 'Request body tidak valid.')
 
+  // Jika ada ganti password (passwordBaru), hash dulu jadi passwordHash
+  // agar konsisten dengan cara penyimpanan di addUser.
+  const forwardBody = { ...body }
+  if (forwardBody.passwordBaru) {
+    forwardBody.passwordHash = await hmacSha256(forwardBody.passwordBaru, env.GAS_SECRET)
+    delete forwardBody.passwordBaru
+    delete forwardBody.passwordLama // jangan teruskan password plain ke GAS
+  }
+
   let gasRes
   try {
     gasRes = await fetch(env.GAS_URL, {
@@ -264,7 +275,7 @@ async function handleUpdateProfile(request, env) {
       body: JSON.stringify({
         secret:  env.GAS_SECRET,
         action:  'updateUserProfile',
-        payload: body,
+        payload: forwardBody,
       }),
     })
   } catch {
@@ -381,7 +392,8 @@ async function handleLogin(request, env) {
       return jsonResponse(503, false, 'Backend belum dikonfigurasi. Hubungi administrator.')
     }
 
-    // Verifikasi ke GAS
+    // Verifikasi ke GAS — hash password dulu agar konsisten dengan addUser
+    const passwordHash = await hmacSha256(password, env.GAS_SECRET)
     let gasRes
     try {
       gasRes = await fetch(env.GAS_URL, {
@@ -390,7 +402,7 @@ async function handleLogin(request, env) {
         body:    JSON.stringify({
           secret:  env.GAS_SECRET,
           action:  'loginUser',
-          payload: { email: email.toLowerCase().trim(), password },
+          payload: { email: email.toLowerCase().trim(), passwordHash },
         }),
       })
     } catch {
