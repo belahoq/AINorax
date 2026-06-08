@@ -167,9 +167,15 @@ Konfirmasi semua action berikut berfungsi end-to-end:
 | `listTemplates` | ✅ | ✅ Ada | ✅ Ada |
 | `saveTemplate` | ✅ | ✅ Ada | ✅ Ada |
 | `createLog` | ✅ | ✅ Ada | ✅ Ada |
+| `loginUser` | ✅ via `/api/login` | ✅ Ada | ✅ Ada |
+| `addUser` | ✅ via `/api/users` | ✅ Ada | ✅ Ada |
+| `listUsers` | ✅ via `/api/users` | ✅ Ada | ✅ Ada |
+| `deleteUser` | ✅ via `/api/users/:id` | ✅ Ada | ✅ Ada |
+| `updateUserProfile` | ✅ via `/api/users/profile` | ✅ Ada | ✅ Ada |
 
 - [ ] Semua action di atas terdaftar di `ALLOWED_ACTIONS` Worker
 - [ ] Semua action di atas terdaftar di `routeAction` GAS
+- [ ] Sheet **Users** sudah dibuat (jalankan `initSpreadsheet` ulang setelah update Code.gs)
 
 ### 4.2 Format Response
 Konfirmasi format response konsisten di semua layer:

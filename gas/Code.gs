@@ -29,7 +29,8 @@ var SHEET = {
   SETTINGS:  'Settings',
   DOCUMENTS: 'Documents',
   TEMPLATES: 'Templates',
-  LOGS:      'Logs'
+  LOGS:      'Logs',
+  USERS:     'Users'
 };
 
 
@@ -187,6 +188,22 @@ function routeAction(action, payload, body) {
 
     case 'createLog':
       return createLog(payload);
+
+    // === User management ===
+    case 'loginUser':
+      return loginUser(payload);
+
+    case 'addUser':
+      return addUser(payload);
+
+    case 'listUsers':
+      return listUsers();
+
+    case 'deleteUser':
+      return deleteUser(payload);
+
+    case 'updateUserProfile':
+      return updateUserProfile(payload);
 
     default:
       return jsonResponse({
@@ -987,6 +1004,227 @@ function createLog(payload) {
 
 
 // ============================================================
+// === USER MANAGEMENT
+// Sheet Users kolom (index):
+// 0:id 1:nama 2:email 3:nip 4:jabatan 5:role 6:passwordHash
+// 7:foto 8:telepon 9:alamat 10:bio 11:isActive 12:createdAt 13:updatedAt
+// ============================================================
+
+/**
+ * loginUser — verifikasi email + passwordHash.
+ * @param {Object} payload - { email, passwordHash }
+ */
+function loginUser(payload) {
+  try {
+    if (!payload || !payload.email || !payload.passwordHash) {
+      return jsonResponse({ success: false, message: 'Email dan password wajib diisi.' });
+    }
+
+    var email = String(payload.email).toLowerCase().trim();
+    var sheet = getSheet(SHEET.USERS);
+    var data  = sheet.getDataRange().getValues();
+
+    for (var i = 1; i < data.length; i++) {
+      var rowEmail = String(data[i][2] || '').toLowerCase().trim();
+      if (rowEmail === email) {
+        // Cek aktif
+        if (data[i][11] === false) {
+          return jsonResponse({ success: false, message: 'Akun Anda nonaktif. Hubungi administrator.' });
+        }
+        // Bandingkan hash
+        if (String(data[i][6]) !== String(payload.passwordHash)) {
+          return jsonResponse({ success: false, message: 'Email atau password salah.' });
+        }
+        // Sukses — kembalikan data user TANPA passwordHash
+        return jsonResponse({
+          success: true,
+          message: 'Login berhasil.',
+          data: {
+            id:      data[i][0],
+            nama:    data[i][1],
+            email:   data[i][2],
+            nip:     data[i][3],
+            jabatan: data[i][4],
+            role:    data[i][5],
+            foto:    data[i][7]
+          }
+        });
+      }
+    }
+
+    return jsonResponse({ success: false, message: 'Email atau password salah.' });
+  } catch (err) {
+    return jsonResponse({ success: false, message: 'Gagal login: ' + err });
+  }
+}
+
+
+/**
+ * addUser — tambah pengguna baru. Email harus unik.
+ * @param {Object} payload - { nama, email, nip, jabatan, role, passwordHash }
+ */
+function addUser(payload) {
+  try {
+    if (!payload || !payload.email || !payload.passwordHash) {
+      return jsonResponse({ success: false, message: 'Email dan password wajib diisi.' });
+    }
+
+    var email = String(payload.email).toLowerCase().trim();
+    var sheet = getSheet(SHEET.USERS);
+    var data  = sheet.getDataRange().getValues();
+
+    // Cek email unik
+    for (var i = 1; i < data.length; i++) {
+      if (String(data[i][2] || '').toLowerCase().trim() === email) {
+        return jsonResponse({ success: false, message: 'Email sudah terdaftar.' });
+      }
+    }
+
+    var now = new Date().toISOString();
+    var id  = generateId('USR');
+
+    sheet.appendRow([
+      id,                          // 0: id
+      payload.nama    || '',       // 1: nama
+      email,                       // 2: email
+      payload.nip     || '',       // 3: nip
+      payload.jabatan || '',       // 4: jabatan
+      payload.role    || 'guru',   // 5: role
+      payload.passwordHash,        // 6: passwordHash
+      '',                          // 7: foto
+      '',                          // 8: telepon
+      '',                          // 9: alamat
+      '',                          // 10: bio
+      true,                        // 11: isActive
+      now,                         // 12: createdAt
+      now                          // 13: updatedAt
+    ]);
+
+    logAction('addUser', 'admin', 'Tambah pengguna ' + email, 'berhasil');
+    return jsonResponse({
+      success: true,
+      message: 'Pengguna berhasil ditambahkan.',
+      data: { id: id, email: email }
+    });
+  } catch (err) {
+    return jsonResponse({ success: false, message: 'Gagal menambahkan pengguna: ' + err });
+  }
+}
+
+
+/**
+ * listUsers — ambil semua pengguna (tanpa passwordHash).
+ */
+function listUsers() {
+  try {
+    var sheet = getSheet(SHEET.USERS);
+    var data  = sheet.getDataRange().getValues();
+    var result = [];
+
+    for (var i = 1; i < data.length; i++) {
+      if (!data[i][0]) continue;
+      result.push({
+        id:        data[i][0],
+        nama:      data[i][1],
+        email:     data[i][2],
+        nip:       data[i][3],
+        jabatan:   data[i][4],
+        role:      data[i][5],
+        foto:      data[i][7],
+        telepon:   data[i][8],
+        isActive:  data[i][11] !== false,
+        createdAt: data[i][12]
+        // passwordHash sengaja TIDAK dikirim
+      });
+    }
+
+    return jsonResponse({
+      success: true,
+      message: 'Daftar pengguna berhasil diambil.',
+      data: result
+    });
+  } catch (err) {
+    return jsonResponse({ success: false, message: 'Gagal mengambil daftar pengguna: ' + err });
+  }
+}
+
+
+/**
+ * deleteUser — hapus pengguna berdasarkan ID.
+ * @param {Object} payload - { id }
+ */
+function deleteUser(payload) {
+  try {
+    if (!payload || !payload.id) {
+      return jsonResponse({ success: false, message: 'ID pengguna wajib diisi.' });
+    }
+
+    var sheet = getSheet(SHEET.USERS);
+    var data  = sheet.getDataRange().getValues();
+
+    for (var i = 1; i < data.length; i++) {
+      if (String(data[i][0]) === String(payload.id)) {
+        sheet.deleteRow(i + 1); // +1 karena baris sheet 1-based
+        logAction('deleteUser', 'admin', 'Hapus pengguna ' + payload.id, 'berhasil');
+        return jsonResponse({ success: true, message: 'Pengguna berhasil dihapus.' });
+      }
+    }
+
+    return jsonResponse({ success: false, message: 'Pengguna tidak ditemukan.' });
+  } catch (err) {
+    return jsonResponse({ success: false, message: 'Gagal menghapus pengguna: ' + err });
+  }
+}
+
+
+/**
+ * updateUserProfile — update data profil / password pengguna.
+ * Identifikasi via id (jika ada) atau email.
+ * @param {Object} payload - { id?, email?, nama, nip, jabatan, foto,
+ *                             telepon, alamat, bio, passwordHash? (baru) }
+ */
+function updateUserProfile(payload) {
+  try {
+    if (!payload || (!payload.id && !payload.email)) {
+      return jsonResponse({ success: false, message: 'ID atau email pengguna wajib diisi.' });
+    }
+
+    var sheet = getSheet(SHEET.USERS);
+    var data  = sheet.getDataRange().getValues();
+    var now   = new Date().toISOString();
+
+    for (var i = 1; i < data.length; i++) {
+      var cocok = (payload.id && String(data[i][0]) === String(payload.id)) ||
+                  (payload.email && String(data[i][2]).toLowerCase().trim() === String(payload.email).toLowerCase().trim());
+      if (cocok) {
+        var rowNum = i + 1;
+        // Update hanya field yang dikirim (tidak menimpa dengan kosong)
+        if (payload.nama    !== undefined) sheet.getRange(rowNum, 2).setValue(payload.nama);
+        if (payload.nip     !== undefined) sheet.getRange(rowNum, 4).setValue(payload.nip);
+        if (payload.jabatan !== undefined) sheet.getRange(rowNum, 5).setValue(payload.jabatan);
+        if (payload.foto    !== undefined) sheet.getRange(rowNum, 8).setValue(payload.foto);
+        if (payload.telepon !== undefined) sheet.getRange(rowNum, 9).setValue(payload.telepon);
+        if (payload.alamat  !== undefined) sheet.getRange(rowNum, 10).setValue(payload.alamat);
+        if (payload.bio     !== undefined) sheet.getRange(rowNum, 11).setValue(payload.bio);
+
+        // Ganti password jika passwordHash baru dikirim
+        if (payload.passwordHash) {
+          sheet.getRange(rowNum, 7).setValue(payload.passwordHash);
+        }
+
+        sheet.getRange(rowNum, 14).setValue(now); // updatedAt
+        return jsonResponse({ success: true, message: 'Profil berhasil diperbarui.' });
+      }
+    }
+
+    return jsonResponse({ success: false, message: 'Pengguna tidak ditemukan.' });
+  } catch (err) {
+    return jsonResponse({ success: false, message: 'Gagal memperbarui profil: ' + err });
+  }
+}
+
+
+// ============================================================
 // HELPER: getSheet — ambil sheet berdasarkan nama
 // ============================================================
 
@@ -1030,7 +1268,10 @@ function initSheetHeaders(sheet, name) {
                   'createdBy', 'docUrl', 'pdfUrl', 'status', 'rawJson'],
     'Templates': ['id', 'type', 'name', 'description', 'docTemplateId',
                   'placeholders', 'isActive', 'createdAt', 'updatedAt'],
-    'Logs':      ['id', 'timestamp', 'action', 'user', 'detail', 'ip', 'status']
+    'Logs':      ['id', 'timestamp', 'action', 'user', 'detail', 'ip', 'status'],
+    'Users':     ['id', 'nama', 'email', 'nip', 'jabatan', 'role',
+                  'passwordHash', 'foto', 'telepon', 'alamat', 'bio',
+                  'isActive', 'createdAt', 'updatedAt']
   };
 
   var cols = headers[name];
@@ -1235,7 +1476,7 @@ function formatTanggalIndonesia(date) {
  */
 function initSpreadsheet() {
   try {
-    var sheets = [SHEET.SETTINGS, SHEET.DOCUMENTS, SHEET.TEMPLATES, SHEET.LOGS];
+    var sheets = [SHEET.SETTINGS, SHEET.DOCUMENTS, SHEET.TEMPLATES, SHEET.LOGS, SHEET.USERS];
     sheets.forEach(function(name) {
       getSheet(name); // akan membuat sheet + header jika belum ada
     });

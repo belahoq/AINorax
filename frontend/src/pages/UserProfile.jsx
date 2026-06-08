@@ -60,6 +60,8 @@ function RoleBadge({ role }) {
       </span>
     )
   }
+  // Guru / Staf — label sesuai role
+  const label = role === 'staf' ? 'Staf' : 'Guru'
   return (
     <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full
                      text-xs font-semibold bg-hijau-100 text-hijau-700">
@@ -67,7 +69,7 @@ function RoleBadge({ role }) {
         <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
         <circle cx="12" cy="7" r="4"/>
       </svg>
-      Operator
+      {label}
     </span>
   )
 }
@@ -512,7 +514,7 @@ export default function UserProfile() {
 
               <div className="p-3 rounded-lg bg-emas-50 border border-emas-200 text-xs text-emas-800">
                 <p className="font-semibold mb-0.5">Catatan</p>
-                <p>Khusus untuk akun <strong>Operator</strong>. Admin login dengan PIN — ganti PIN melalui Cloudflare Dashboard.</p>
+                <p>Khusus untuk akun <strong>Guru / Staf</strong>. Admin login dengan PIN — ganti PIN melalui Cloudflare Dashboard.</p>
               </div>
 
               {/* Password lama */}

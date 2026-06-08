@@ -265,6 +265,31 @@
 
 ---
 
+### [REVIEW] Pre-Deploy Review #2 — Audit Fitur User Management
+- **Tanggal:** 2026-06-08
+- **Status:** ✅ Selesai
+- **Deskripsi:** Review menyeluruh sebelum deploy, fokus pada fitur Add User / Role / Profil yang baru ditambahkan (TAHAP-12 + revisi). Ditemukan 3 bug kritis yang akan menyebabkan fitur user gagal total di production, plus 2 minor. Semua diperbaiki.
+- **Bug yang ditemukan & diperbaiki:**
+  1. 🔴 **KRITIS** — `worker/index.js` `handleAddUser` mewajibkan field `nama`, padahal form AddUser (setelah revisi) hanya mengirim `email`+`password`+`role`. Akibat: tambah user **selalu gagal 400**. Fix: hanya `email`+`password` yang wajib; `nama`/`nip`/`jabatan` dikirim string kosong (diisi user via Profil); default role `guru`.
+  2. 🔴 **KRITIS** — `worker/index.js` `handleLogin` mode operator mengirim password **plain** ke GAS, tapi `handleAddUser` menyimpan **HMAC hash**. Akibat: login operator tidak akan pernah cocok. Fix: hash password dengan `hmacSha256(password, GAS_SECRET)` sebelum kirim ke GAS action `loginUser`.
+  3. 🔴 **KRITIS** — `gas/Code.gs` tidak memiliki action user management apapun, padahal Worker sudah memanggilnya. Akibat: semua fitur user (login operator, tambah, daftar, hapus, update profil) gagal. Fix: tambah `SHEET.USERS`, 5 fungsi (`loginUser`, `addUser`, `listUsers`, `deleteUser`, `updateUserProfile`), 5 case di `routeAction`, header sheet Users di `initSheetHeaders`, dan Users di `initSpreadsheet`.
+  4. 🟡 **MINOR** — `UserProfile.jsx` `RoleBadge` menampilkan "Operator" untuk semua non-admin. Fix: tampilkan "Guru"/"Staf" sesuai role; catatan ganti password disesuaikan.
+  5. 🟡 **MINOR** — `handleUpdateProfile` Worker meneruskan `passwordBaru` plain ke GAS. Fix: hash `passwordBaru` → `passwordHash`, hapus `passwordLama`/`passwordBaru` sebelum forward.
+- **File diubah:**
+  - `worker/index.js` — fix handleAddUser, handleLogin operator, handleUpdateProfile
+  - `gas/Code.gs` — tambah SHEET.USERS, 5 fungsi user, routeAction cases, header & init
+  - `frontend/src/pages/UserProfile.jsx` — RoleBadge guru/staf, catatan password
+  - `PRE_DEPLOY_CHECKLIST.md` — tambah baris action user management + sheet Users
+- **Yang dikonfirmasi aman:**
+  - Token format `ts.role.hmac` + backward compat `ts.hmac` ✅
+  - `requireAdmin()` proteksi endpoint `/api/users` (cek role admin) ✅
+  - Password tidak pernah disimpan/transit dalam bentuk plain ✅ (selalu HMAC)
+  - `AdminRoute` di frontend redirect non-admin dari halaman admin-only ✅
+  - Fallback dummy data tetap berfungsi untuk semua fungsi user ✅
+- **Catatan deploy:** Setelah update `Code.gs`, **wajib jalankan `initSpreadsheet` ulang** dari Apps Script Editor agar sheet **Users** terbuat, lalu **redeploy** GAS sebagai New Version.
+
+---
+
 ### [REVISI] Tambah Pengguna — Form disederhanakan, Role diperbarui, Hapus Pengguna
 - **Tanggal:** 2026-06-08
 - **Status:** ✅ Selesai
