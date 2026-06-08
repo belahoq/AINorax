@@ -144,8 +144,19 @@ export default function UserProfile() {
     setSavingProfil(true)
     try {
       const payload = { ...formProfil, id: profile.id }
-      await updateProfile(payload)
-      // Simpan ke localStorage
+      const result  = await updateProfile(payload)
+
+      // Jika GAS mengupload foto ke Drive dan mengembalikan URL publik,
+      // pakai URL tersebut (bukan base64 yang ada di formProfil.foto)
+      const fotoTersimpan = result?.data?.foto || formProfil.foto
+
+      // Update preview ke URL Drive (agar tidak ada base64 besar di memory)
+      if (result?.data?.foto) {
+        setFotoPreview(result.data.foto)
+        setFormProfil(prev => ({ ...prev, foto: result.data.foto }))
+      }
+
+      // Simpan ke localStorage — gunakan URL Drive, bukan base64
       saveProfile({
         name:    formProfil.nama,
         nama:    formProfil.nama,
@@ -154,7 +165,7 @@ export default function UserProfile() {
         jabatan: formProfil.jabatan,
         telepon: formProfil.telepon,
         alamat:  formProfil.alamat,
-        foto:    formProfil.foto,
+        foto:    fotoTersimpan,
         bio:     formProfil.bio,
       })
       toast.success('Profil berhasil diperbarui.')
