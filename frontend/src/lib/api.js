@@ -596,6 +596,108 @@ export async function pingWorker() {
 export const pingKoneksi = pingWorker
 
 // ============================================================
+// addUser — tambah pengguna baru (admin only)
+// ============================================================
+export async function addUser(payload) {
+  if (!BACKEND_CONFIGURED) {
+    await _delay(900)
+    return { message: 'Pengguna berhasil ditambahkan (mode demo).' }
+  }
+
+  const res = await _fetchWorker('/api/users', {
+    method: 'POST',
+    body:   JSON.stringify(payload),
+  })
+
+  if (!res?.success) throw new Error(res?.message || 'Gagal menambahkan pengguna.')
+  return { message: res.message || 'Pengguna berhasil ditambahkan.', data: res.data }
+}
+
+// ============================================================
+// listUsers — ambil daftar semua pengguna (admin only)
+// ============================================================
+export async function listUsers() {
+  if (!BACKEND_CONFIGURED) {
+    await _delay(500)
+    // Dummy users untuk mode demo
+    return [
+      {
+        id: 'USR-001', nama: 'Administrator',
+        email: '', nip: '', jabatan: 'Admin',
+        role: 'admin', foto: '', isActive: true,
+        createdAt: '2026-06-01',
+      },
+      {
+        id: 'USR-002', nama: 'Budi Santoso, S.Pd.',
+        email: 'budi@sdn3pringgabaya.sch.id', nip: '19850101200901001',
+        jabatan: 'Guru Kelas V', role: 'operator', foto: '',
+        isActive: true, createdAt: '2026-06-02',
+      },
+      {
+        id: 'USR-003', nama: 'Ani Rahayu',
+        email: 'ani@sdn3pringgabaya.sch.id', nip: '',
+        jabatan: 'Staf TU', role: 'operator', foto: '',
+        isActive: true, createdAt: '2026-06-03',
+      },
+    ]
+  }
+
+  const res = await _fetchWorker('/api/users')
+  if (!res?.success) throw new Error(res?.message || 'Gagal mengambil daftar pengguna.')
+  return res?.data || []
+}
+
+// ============================================================
+// updateProfile — update profil user sendiri
+// ============================================================
+export async function updateProfile(payload) {
+  if (!BACKEND_CONFIGURED) {
+    await _delay(700)
+    return { message: 'Profil berhasil diperbarui (mode demo).', data: payload }
+  }
+
+  const res = await _fetchWorker('/api/users/profile', {
+    method: 'POST',
+    body:   JSON.stringify(payload),
+  })
+
+  if (!res?.success) throw new Error(res?.message || 'Gagal memperbarui profil.')
+  return { message: res.message || 'Profil berhasil diperbarui.', data: res.data }
+}
+
+// ============================================================
+// loginWithEmail — login operator dengan email + password
+// ============================================================
+export async function loginWithEmail(email, password) {
+  if (!BACKEND_CONFIGURED) {
+    await _delay(800)
+    // Akun demo: email apapun dengan password 'demo123'
+    if (password === 'demo123') {
+      return {
+        token: 'dummy-op-token-' + Date.now(),
+        user:  {
+          id: 'USR-DEMO', name: email.split('@')[0],
+          email, role: 'operator', jabatan: 'Staf Demo',
+        },
+        message: 'Login berhasil (mode demo).',
+      }
+    }
+    throw new Error('Email atau password salah. Password demo: demo123')
+  }
+
+  const res = await _fetchWorker('/api/login', {
+    method: 'POST',
+    body:   JSON.stringify({ email, password }),
+  })
+
+  return {
+    token:   res?.data?.token,
+    user:    res?.data?.user || { name: email, role: 'operator', email },
+    message: res?.message || 'Login berhasil.',
+  }
+}
+
+// ============================================================
 // Helper internal
 // ============================================================
 

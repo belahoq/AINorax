@@ -3,7 +3,7 @@
 // ============================================================
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { login } from '../lib/api'
+import { login, loginWithEmail } from '../lib/api'
 import { saveSession, isAuthenticated } from '../lib/auth'
 import { BRAND, SEKOLAH } from '../lib/constants'
 
@@ -22,8 +22,14 @@ const EyeIcon = ({ open }) => open ? (
 
 export default function Login() {
   const navigate = useNavigate()
+
+  // Tab: 'admin' (PIN) atau 'operator' (email+password)
+  const [tab,     setTab]     = useState('admin')
   const [pin,     setPin]     = useState('')
+  const [email,   setEmail]   = useState('')
+  const [password, setPassword] = useState('')
   const [showPin, setShowPin] = useState(false)
+  const [showPass, setShowPass] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error,   setError]   = useState('')
 
@@ -34,24 +40,21 @@ export default function Login() {
 
   async function handleSubmit(e) {
     e.preventDefault()
-    if (!pin.trim()) {
-      setError('Masukkan PIN terlebih dahulu.')
-      return
-    }
     setError('')
     setLoading(true)
     try {
-      const res = await login(pin)
-
-      // Simpan token + data user ke localStorage
+      let res
+      if (tab === 'admin') {
+        if (!pin.trim()) { setError('Masukkan PIN terlebih dahulu.'); setLoading(false); return }
+        res = await login(pin)
+      } else {
+        if (!email.trim() || !password) { setError('Email dan password wajib diisi.'); setLoading(false); return }
+        res = await loginWithEmail(email, password)
+      }
       saveSession(res.token, res.user)
-
       navigate('/dashboard', { replace: true })
-
     } catch (err) {
-      // Tampilkan pesan ramah untuk operator sekolah
-      const msg = err.message || 'Login gagal. Periksa PIN Anda dan coba lagi.'
-      setError(msg)
+      setError(err.message || 'Login gagal. Periksa kembali data Anda.')
     } finally {
       setLoading(false)
     }
@@ -91,49 +94,105 @@ export default function Login() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4" noValidate>
-              <div>
-                <label className="form-label">PIN Admin</label>
-                <div className="relative">
-                  <input
-                    type={showPin ? 'text' : 'password'}
-                    value={pin}
-                    onChange={e => { setPin(e.target.value); setError('') }}
-                    placeholder="Masukkan PIN"
-                    className={`form-input pr-10 text-center tracking-[0.3em] text-lg font-semibold
-                      ${error ? 'border-red-400 focus:ring-red-400' : ''}`}
-                    maxLength={16}
-                    autoFocus
-                    autoComplete="current-password"
-                    disabled={loading}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPin(v => !v)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400
-                               hover:text-gray-600 transition-colors"
-                    tabIndex={-1}
-                  >
-                    <EyeIcon open={showPin} />
+              {/* Tab pilih jenis login */}
+              <div className="flex rounded-lg border border-gray-200 overflow-hidden mb-2">
+                {[
+                  { id: 'admin',    label: 'Admin (PIN)'     },
+                  { id: 'operator', label: 'Operator (Email)' },
+                ].map(t => (
+                  <button key={t.id} type="button"
+                    onClick={() => { setTab(t.id); setError('') }}
+                    className={[
+                      'flex-1 py-2 text-xs font-semibold transition-colors',
+                      tab === t.id
+                        ? 'bg-hijau-600 text-white'
+                        : 'bg-white text-gray-500 hover:bg-gray-50',
+                    ].join(' ')}>
+                    {t.label}
                   </button>
-                </div>
-
-                {/* Pesan error */}
-                {error && (
-                  <p className="mt-2 text-xs text-red-600 flex items-start gap-1.5
-                                bg-red-50 border border-red-200 rounded-lg px-3 py-2">
-                    <svg className="w-3.5 h-3.5 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd"
-                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                        clipRule="evenodd"/>
-                    </svg>
-                    {error}
-                  </p>
-                )}
+                ))}
               </div>
+
+              {/* Form Admin (PIN) */}
+              {tab === 'admin' && (
+                <div>
+                  <label className="form-label">PIN Admin</label>
+                  <div className="relative">
+                    <input
+                      type={showPin ? 'text' : 'password'}
+                      value={pin}
+                      onChange={e => { setPin(e.target.value); setError('') }}
+                      placeholder="Masukkan PIN"
+                      className={`form-input pr-10 text-center tracking-[0.3em] text-lg font-semibold
+                        ${error ? 'border-red-400 focus:ring-red-400' : ''}`}
+                      maxLength={16}
+                      autoFocus
+                      autoComplete="current-password"
+                      disabled={loading}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPin(v => !v)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400
+                                 hover:text-gray-600 transition-colors"
+                      tabIndex={-1}
+                    >
+                      <EyeIcon open={showPin} />
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Form Operator (Email + Password) */}
+              {tab === 'operator' && (
+                <div className="space-y-3">
+                  <div>
+                    <label className="form-label">Email</label>
+                    <input
+                      type="email" value={email}
+                      onChange={e => { setEmail(e.target.value); setError('') }}
+                      placeholder="nama@sdn3pringgabaya.sch.id"
+                      className={`form-input ${error ? 'border-red-400' : ''}`}
+                      autoFocus disabled={loading}
+                      autoComplete="email"
+                    />
+                  </div>
+                  <div>
+                    <label className="form-label">Password</label>
+                    <div className="relative">
+                      <input
+                        type={showPass ? 'text' : 'password'} value={password}
+                        onChange={e => { setPassword(e.target.value); setError('') }}
+                        placeholder="Password"
+                        className={`form-input pr-10 ${error ? 'border-red-400' : ''}`}
+                        disabled={loading} autoComplete="current-password"
+                      />
+                      <button type="button" tabIndex={-1}
+                        onClick={() => setShowPass(v => !v)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                        <EyeIcon open={showPass} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Pesan error */}
+              {error && (
+                <p className="text-xs text-red-600 flex items-start gap-1.5
+                              bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+                  <svg className="w-3.5 h-3.5 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd"
+                      d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                      clipRule="evenodd"/>
+                  </svg>
+                  {error}
+                </p>
+              )}
 
               <button
                 type="submit"
-                disabled={loading || !pin.trim()}
+                disabled={loading || (tab === 'admin' ? !pin.trim() : (!email.trim() || !password))}
                 className="btn-primary w-full justify-center py-2.5 text-base"
               >
                 {loading ? (

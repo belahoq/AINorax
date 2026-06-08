@@ -1,10 +1,10 @@
 // ============================================================
 // Topbar.jsx — Header atas halaman
 // ============================================================
-import { useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { BRAND, SEKOLAH } from '../lib/constants'
+import { getProfile, isAdmin } from '../lib/auth'
 
-// Peta path → judul halaman (lengkap termasuk route baru)
 const PAGE_TITLES = {
   '/dashboard':   'Dashboard',
   '/buat-dokumen':'Buat Dokumen',
@@ -15,6 +15,8 @@ const PAGE_TITLES = {
   '/absensi-qr':  'Absensi QR',
   '/inventaris':  'Inventaris',
   '/pengaturan':  'Pengaturan',
+  '/add-user':    'Tambah Pengguna',
+  '/profil':      'Profil Saya',
 }
 
 // --- Ikon ---
@@ -33,7 +35,13 @@ const BellIcon = () => (
 
 export default function Topbar({ onMenuClick }) {
   const { pathname } = useLocation()
-  const pageTitle = PAGE_TITLES[pathname] ?? 'SDENTIBAYA AdminKit'
+  const navigate     = useNavigate()
+  const pageTitle    = PAGE_TITLES[pathname] ?? 'SDENTIBAYA AdminKit'
+  const profile      = getProfile() || {}
+  const nama         = profile.name || profile.nama || 'Admin'
+  const foto         = profile.foto || ''
+  const initials     = nama.split(' ').slice(0, 2).map(w => w[0]?.toUpperCase()).join('')
+  const adminUser    = isAdmin()
 
   return (
     <header className="sticky top-0 z-10 h-14 bg-white border-b border-gray-100 flex items-center
@@ -93,15 +101,27 @@ export default function Topbar({ onMenuClick }) {
           <BellIcon />
         </button>
 
-        {/* Avatar + nama admin */}
-        <div className="flex items-center gap-2 pl-2 ml-1 border-l border-gray-100">
+        {/* Avatar + nama — klik ke profil */}
+        <div
+          className="flex items-center gap-2 pl-2 ml-1 border-l border-gray-100 cursor-pointer
+                     hover:opacity-80 transition-opacity"
+          onClick={() => navigate('/profil')}
+          title="Lihat profil saya"
+        >
           <div className="w-8 h-8 rounded-full bg-gradient-to-br from-hijau-500 to-hijau-700
-                          flex items-center justify-center shadow-sm shrink-0">
-            <span className="text-[11px] font-bold text-white">A</span>
+                          flex items-center justify-center shadow-sm shrink-0 overflow-hidden">
+            {foto ? (
+              <img src={foto} alt={nama} className="w-full h-full object-cover"
+                   onError={e => { e.target.style.display='none' }} />
+            ) : (
+              <span className="text-[11px] font-bold text-white">{initials}</span>
+            )}
           </div>
           <div className="hidden sm:block leading-none">
-            <p className="text-[13px] font-semibold text-gray-700">Admin</p>
-            <p className="text-[10px] text-gray-400 mt-0.5">Administrator</p>
+            <p className="text-[13px] font-semibold text-gray-700 truncate max-w-[100px]">{nama}</p>
+            <p className="text-[10px] text-gray-400 mt-0.5">
+              {adminUser ? 'Administrator' : 'Operator'}
+            </p>
           </div>
         </div>
       </div>

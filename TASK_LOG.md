@@ -265,6 +265,25 @@
 
 ---
 
+### [TAHAP-12] Fitur Add User, Role-Based Access, dan Halaman Profil
+- **Tanggal:** 2026-06-08
+- **Status:** ✅ Selesai
+- **Deskripsi:** Menambahkan sistem multi-user dengan dua role (admin/operator), halaman Add User di grup Sistem sidebar, proteksi route berbasis role, dan halaman Profil lengkap untuk semua user.
+- **File dibuat:**
+  - `frontend/src/pages/AddUser.jsx` — form tambah pengguna (nama, email, NIP, jabatan, password, konfirmasi, role), daftar user terdaftar, badge role dan status
+  - `frontend/src/pages/UserProfile.jsx` — kartu hero profil dengan banner, avatar besar, tab Edit Profil (foto URL/upload, data pribadi, bio) + tab Ganti Password, simpan ke localStorage + GAS
+- **File diubah:**
+  - `frontend/src/lib/auth.js` — tambah `getRole()`, `isAdmin()`, `saveProfile()`, `getProfile()`, `USER_PROFILE_KEY`
+  - `frontend/src/lib/constants.js` — tambah `USER_ROLES`, `USER_PROFILE_KEY`, `MENU_GROUPS_ADMIN`, `MENU_GROUPS_USER`, `MENU_ITEMS` flat gabungan; ubah `MENU_GROUPS` menjadi alias ADMIN
+  - `frontend/src/App.jsx` — tambah `AdminRoute`, route `/add-user`, `/profil`, proteksi admin-only untuk `master-data` + `add-user` + `pengaturan`
+  - `frontend/src/pages/Login.jsx` — tambah tab Admin (PIN) vs Operator (email+password), import `loginWithEmail`
+  - `frontend/src/components/Sidebar.jsx` — render `MENU_GROUPS_ADMIN` atau `MENU_GROUPS_USER` berdasarkan `getRole()`, ikon `user-plus` dan `user`, link profil di footer
+  - `frontend/src/components/Topbar.jsx` — avatar dari profil localStorage, klik avatar → navigate ke `/profil`, tambah page title `/add-user` + `/profil`
+  - `frontend/src/lib/api.js` — tambah `addUser()`, `listUsers()`, `updateProfile()`, `loginWithEmail()`
+  - `worker/index.js` — update `handleLogin` support email+password, tambah `handleAddUser`, `handleListUsers`, `handleUpdateProfile`, `requireAdmin()`, `extractRoleFromToken()`, update `generateToken/verifyToken` format `ts.role.hmac`
+
+---
+
 ### [BUGFIX] Form Surat Undangan Rapat tidak ada field Tanggal Surat
 - **Tanggal:** 2026-06-07
 - **Status:** ✅ Diperbaiki

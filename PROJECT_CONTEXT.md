@@ -80,6 +80,10 @@ Response JSON kembali ke Worker → Frontend
 | 2026-06-07 | Login berbasis PIN (ADMIN_PIN di Worker env)                              | Sederhana untuk konteks sekolah, tidak perlu OAuth kompleks   |
 | 2026-06-07 | Google Docs sebagai generator dokumen (bukan HTML-to-PDF)                 | Format dokumen rapi, sudah familiar, mudah diedit template-nya|
 | 2026-06-07 | Edit dan Clone template dilakukan di frontend, GAS tidak diubah           | `saveTemplate` GAS sudah mendukung upsert (insert jika tanpa `id`, update jika ada `id`) — tidak perlu action baru |
+| 2026-06-07 | Sistem multi-user: Admin (PIN) + Operator (email+password)                 | Sederhana untuk konteks sekolah; Admin tetap pakai PIN untuk backward compat, Operator pakai email+password yang diverifikasi GAS |
+| 2026-06-07 | Token menyertakan role (`ts.role.hmac`) bukan hanya timestamp               | Role dibutuhkan Worker untuk proteksi endpoint admin-only (`/api/users`) tanpa menyimpan state di KV |
+| 2026-06-07 | Password operator di-hash dengan HMAC-SHA256(password, GAS_SECRET) di Worker sebelum dikirim ke GAS | Mencegah password plain text transit antara Worker ↔ GAS |
+| 2026-06-07 | Foto profil: URL atau base64 (<500KB) disimpan di localStorage               | Tanpa storage server; base64 cukup untuk foto profil kecil, URL untuk Google Drive/hosting eksternal |
 
 ---
 
